@@ -2,7 +2,7 @@ module Boole.BooleFraction
 
 import Math.Multiset
 import Math.BoxInt
-import Boole.F2
+import Boole.BF2
 import Boole.BitGate
 
 %default total

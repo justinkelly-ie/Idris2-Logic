@@ -1,4 +1,4 @@
-module Boole.F2
+module Boole.BF2
 
 import Math.BoxInt
 

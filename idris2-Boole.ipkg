@@ -13,6 +13,6 @@ modules = Boole.Bit, Boole.Byte, Boole.Connective
         , Boole.Bridge
         , Boole.Hehner
         , Boole.Hailperin
-        , Boole.F2
+        , Boole.BF2
         , Boole.BitGate
         , Boole.BooleFraction
