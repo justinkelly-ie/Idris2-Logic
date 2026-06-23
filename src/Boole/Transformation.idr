@@ -29,24 +29,49 @@ public export
 TransformationMSet : (state : Type) -> Type
 TransformationMSet state = Multiset BF2 (SingRelation (LogicState state))
 
-||| A wire connection (buffer gate) mapping an input state to an output state.
+||| Transitive relation multiplication (Composition).
+||| Maps [a -> b] * [c -> d] to [a -> d] iff b == c.
 public export
-bufferGate : state -> state -> TransformationMSet state
-bufferGate input output = AddM (MkSingRelation (MkSing (VarState input)) (MkSing (VarState output))) O ZeroM
+mulRelation : Eq state => SingRelation (LogicState state) -> SingRelation (LogicState state) -> Maybe (SingRelation (LogicState state))
+mulRelation (MkSingRelation a b) (MkSingRelation c d) =
+  if b == c then Just (MkSingRelation a d) else Nothing
 
-||| A NOT gate mapping an input state to a complement output state.
-||| Implements XOR-inversion by adding the unit constant as an active source.
+||| Relational multiset multiplication (Transitive product of multisets).
 public export
-notGate : state -> state -> TransformationMSet state
-notGate input output =
-  let wire = MkSingRelation (MkSing (VarState input)) (MkSing (VarState output))
-      bias = MkSingRelation (MkSing (ConstState BaseAnchor)) (MkSing (VarState output))
-  in AddM wire O (AddM bias O ZeroM)
+mulTransformation : Eq state => TransformationMSet state -> TransformationMSet state -> TransformationMSet state
+mulTransformation ZeroM _ = ZeroM
+mulTransformation (AddM r1 c1 rest) m2 =
+  annihilateMultiset (addMultiset (mulInner r1 c1 m2) (mulTransformation rest m2))
+  where
+    mulInner : SingRelation (LogicState state) -> BF2 -> TransformationMSet state -> TransformationMSet state
+    mulInner _ _ ZeroM = ZeroM
+    mulInner r1 c1 (AddM r2 c2 ys) =
+      case mulRelation r1 r2 of
+        Just rProd => insertItem rProd (mulBF2 c1 c2) (mulInner r1 c1 ys)
+        Nothing    => mulInner r1 c1 ys
 
-||| An XOR gate mapping two input states to a single output state.
+||| Num instance enforcing the Algebra of Boole (+ and *) over Logic Relations.
 public export
-xorGate : state -> state -> state -> TransformationMSet state
-xorGate in1 in2 output =
-  let w1 = MkSingRelation (MkSing (VarState in1)) (MkSing (VarState output))
-      w2 = MkSingRelation (MkSing (VarState in2)) (MkSing (VarState output))
-  in AddM w1 O (AddM w2 O ZeroM)
+Eq state => Num (TransformationMSet state) where
+  (+) x y = annihilateMultiset (addMultiset x y)
+  (*) = mulTransformation
+  
+  fromInteger 0 = ZeroM
+  -- Constant one is a self-loop on the constant base anchor
+  fromInteger 1 = AddM (MkSingRelation (MkSing (ConstState BaseAnchor)) (MkSing (ConstState BaseAnchor))) O ZeroM
+  fromInteger _ = ZeroM
+
+-- =======================================================================
+-- ALGEBRA OF BOOLE OPERATIONS (IN COMMENTS ONLY)
+--
+-- bufferGate input output = 
+--   wire input output
+--
+-- NOT gate (bias + wire):
+--   bias = MkSingRelation (MkSing (ConstState BaseAnchor)) (MkSing (VarState output))
+--   wire = MkSingRelation (MkSing (VarState input)) (MkSing (VarState output))
+--   notGate input output = bias + wire
+--
+-- XOR gate (wire1 + wire2):
+--   xorGate in1 in2 output = wire in1 output + wire in2 output
+-- =======================================================================
