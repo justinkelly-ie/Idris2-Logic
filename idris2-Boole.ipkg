@@ -17,3 +17,4 @@ modules = Boole.Bit, Boole.Byte, Boole.Connective
         , Boole.BitGate
         , Boole.BooleFraction
         , Boole.LiftedPolynumber
+        , Boole.SingFraction
