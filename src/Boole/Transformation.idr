@@ -58,7 +58,7 @@ Eq state => Num (TransformationMSet state) where
   
   fromInteger 0 = ZeroM
   -- Constant one is a self-loop on the constant base anchor
-  fromInteger 1 = AddM (MkSingRelation (MkSing (ConstState BaseAnchor)) (MkSing (ConstState BaseAnchor))) O ZeroM
+  fromInteger 1 = AddM (MkSingRelation (ConstState BaseAnchor) (ConstState BaseAnchor)) O ZeroM
   fromInteger _ = ZeroM
 
 -- =======================================================================
@@ -68,8 +68,8 @@ Eq state => Num (TransformationMSet state) where
 --   wire input output
 --
 -- NOT gate (bias + wire):
---   bias = MkSingRelation (MkSing (ConstState BaseAnchor)) (MkSing (VarState output))
---   wire = MkSingRelation (MkSing (VarState input)) (MkSing (VarState output))
+--   bias = MkSingRelation (ConstState BaseAnchor) (VarState output)
+--   wire = MkSingRelation (VarState input) (VarState output)
 --   notGate input output = bias + wire
 --
 -- XOR gate (wire1 + wire2):
