@@ -3,7 +3,7 @@ module Boole.Transformation
 import Math.Multiset
 import Math.Sing
 import Boole.BF2
-import Boole.BooleFraction
+import Boole.SingFraction
 
 %default total
 

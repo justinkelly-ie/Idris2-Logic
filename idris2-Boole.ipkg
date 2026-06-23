@@ -14,8 +14,6 @@ modules = Boole.Bit, Boole.Byte, Boole.Connective
         , Boole.FunctionalProbability
         , Boole.Hailperin
         , Boole.BF2
-        , Boole.BitGate
-        , Boole.BooleFraction
         , Boole.LiftedPolynumber
         , Boole.SingFraction
         , Boole.Transformation

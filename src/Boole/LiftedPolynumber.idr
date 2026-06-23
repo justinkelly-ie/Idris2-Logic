@@ -6,7 +6,7 @@ import Math.Multiset
 import Math.BoxInt
 import Boole.BF2
 import Boole.Bit
-import Boole.BooleFraction
+import Boole.SingFraction
 import Boole.Bridge
 import Boole.Polynumber
 

@@ -5,9 +5,20 @@ import Math.Sing
 import Math.Sing1
 import Math.BoxInt
 import Boole.BF2
-import Boole.BooleFraction
 
 %default total
+
+public export
+data TrivialBase = BaseAnchor
+
+public export
+Eq TrivialBase where
+  BaseAnchor == BaseAnchor = True
+
+public export
+Show TrivialBase where
+  show BaseAnchor = "BaseAnchor"
+
 
 ||| A type alias for a Singleton Bit-Gate Multiset.
 ||| Defined directly as the Sing multiset with weights BF2.
