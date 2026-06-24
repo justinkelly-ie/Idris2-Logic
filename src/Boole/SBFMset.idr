@@ -1,15 +1,95 @@
 module Boole.SBFMset
 
 import Math.Multiset
-import Math.Sing
+import Math.Pixel
+import Math.BoxInt
 import Boole.BF2
-import Boole.SingFraction
-import Boole.Transformation
 
 %default total
 
-||| The Symmetric Bilinear Form MSet (SBFMset):
-||| A multiset of logical relations mapping inputs to gate inputs.
+-----------------------------------------------------------------------
+-- 1. COORDINATE DOMAIN DEFINITIONS
+-----------------------------------------------------------------------
+
+||| Coordinate index for 1D logic wires
 public export
-SBFMset : (state : Type) -> Type
-SBFMset state = Multiset BF2 (SingRelation (LogicState state))
+data Coord1D = Wire
+
+public export
+Eq Coord1D where
+  Wire == Wire = True
+
+||| Coordinate index for 2D spatial metrics
+public export
+data Coord2D = X | Y
+
+public export
+Eq Coord2D where
+  X == X = True
+  Y == Y = True
+  _ == _ = False
+
+-----------------------------------------------------------------------
+-- 2. STATIC SBFMSET METRIC TEMPLATES
+-----------------------------------------------------------------------
+
+-- Row 1: Logical Parity Form [ ((Wire, Wire), 1) ] over BF2
+public export
+row1SBF : Multiset BF2 (Pixel Blue Coord1D)
+row1SBF = AddM (MkPixel Wire Wire) O ZeroM
+
+-- Row 7: Euclidean Blue Form [ ((X, X), 1), ((Y, Y), 1) ] over BoxInt
+public export
+blueSBF : Multiset BoxInt (Pixel Blue Coord2D)
+blueSBF = AddM (MkPixel X X) 1 (AddM (MkPixel Y Y) 1 ZeroM)
+
+-- Row 8: Minkowski Red Form [ ((X, X), 1), ((Y, Y), -1) ] over BoxInt
+public export
+redSBF : Multiset BoxInt (Pixel Red Coord2D)
+redSBF = AddM (MkPixel X X) 1 (AddM (MkPixel Y Y) (-1) ZeroM)
+
+-- Row 9: Galilean Green Form [ ((X, Y), 1), ((Y, X), 1) ] over BoxInt
+public export
+greenSBF : Multiset BoxInt (Pixel Green Coord2D)
+greenSBF = AddM (MkPixel X Y) 1 (AddM (MkPixel Y X) 1 ZeroM)
+
+-----------------------------------------------------------------------
+-- 3. UNIVERSAL EVALUATION PIPELINE
+-----------------------------------------------------------------------
+
+||| Construct the tensor self-product (v ⊗ v) of an input state vector.
+public export
+tensorSelf : (Eq a, Eq (a, a), Num c, Eq c) => Multiset c a -> Multiset c (a, a)
+tensorSelf ZeroM = ZeroM
+tensorSelf (AddM x cx rest) =
+  let current = tensorWith x cx (AddM x cx rest)
+      accumulated = tensorSelf rest
+  in addMultiset current accumulated
+  where
+    tensorWith : a -> c -> Multiset c a -> Multiset c (a, a)
+    tensorWith _ _ ZeroM = ZeroM
+    tensorWith x cx (AddM y cy ys) =
+      insertItem (x, y) (cx * cy) (tensorWith x cx ys)
+
+||| Helper to lookup the multiplicity of a coordinate pair in the tensor product.
+public export
+lookupCount : (Eq a, Num c, Eq c) => a -> Multiset c a -> c
+lookupCount _ ZeroM = 0
+lookupCount k (AddM k' v rest) =
+  if k == k'
+    then v + lookupCount k rest
+    else lookupCount k rest
+
+||| The universal bilinear form evaluator.
+||| Evaluates Q(v) = Sum( (v ⊗ v) · M ) across any domain and coefficient field.
+public export
+evalSBFMset : (Eq a, Eq (a, a), Num c, Eq c) => Multiset c (Pixel metric a) -> Multiset c a -> c
+evalSBFMset matrix inputVec =
+  let tensor = tensorSelf inputVec
+  in matchSum matrix tensor
+  where
+    matchSum : Multiset c (Pixel metric a) -> Multiset c (a, a) -> c
+    matchSum ZeroM _ = 0
+    matchSum (AddM (MkPixel r c) w rest) t =
+      let val = lookupCount (r, c) t
+      in (w * val) + matchSum rest t
