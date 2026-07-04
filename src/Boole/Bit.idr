@@ -2,6 +2,7 @@ module Boole.Bit
 
 import Data.Linear
 import Math.Interfaces
+import Math.DepSing
 
 %default total
 
@@ -137,3 +138,36 @@ LEq BVal where
   lEq One  One  = Builtin.(#) True  (Builtin.(#) One  One)
   lEq Zero One  = Builtin.(#) False (Builtin.(#) Zero One)
   lEq One  Zero = Builtin.(#) False (Builtin.(#) One  Zero)
+
+-----------------------------------------------------------------------
+-- DEPENDENT BIT DEFINITIONS (Box Arithmetic Layer 1)
+-----------------------------------------------------------------------
+
+||| A dependently typed bit: a singleton with BVal coefficient.
+public export
+0 Bit : (a : Type) -> a -> BVal -> Type
+Bit a x weight = Math.DepSing.Sing BVal a x weight
+
+||| A dependently typed bit restricted strictly to weight One.
+public export
+0 Bit1 : (a : Type) -> a -> Type
+Bit1 a x = Math.DepSing.Sing1 BVal a x One
+
+-----------------------------------------------------------------------
+-- DEPENDENT BIT ARITHMETIC (BF2-based)
+-----------------------------------------------------------------------
+
+||| Addition of two dependent bits at the same coordinate.
+public export
+addBit : {x : a} -> Bit a x w1 -> Bit a x w2 -> Bit a x (w1 + w2)
+addBit (MkDepSing x w1) (MkDepSing x w2) = MkDepSing x (w1 + w2)
+
+||| Addition of a dependent bit and a dependent Bit1 at the same coordinate.
+public export
+addBitBit1 : {x : a} -> Bit a x w -> Bit1 a x -> Bit a x (w + One)
+addBitBit1 (MkDepSing x w) (MkDepSing x One, Refl) = MkDepSing x (w + One)
+
+||| Addition of two dependent Bit1 elements at the same coordinate.
+public export
+addBit1Bit1 : {x : a} -> Bit1 a x -> Bit1 a x -> Bit a x Zero
+addBit1Bit1 (MkDepSing x One, Refl) (MkDepSing x One, Refl) = MkDepSing x Zero

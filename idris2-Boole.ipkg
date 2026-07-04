@@ -12,9 +12,10 @@ modules = Boole.Bit, Boole.Byte, Boole.Connective
         , Boole.Interfaces
         , Boole.Bridge
         , Boole.FunctionalProbability
-        , Boole.Hailperin
         , Boole.BF2
         , Boole.LiftedPolynumber
         , Boole.SingFraction
         , Boole.Transformation
         , Boole.SBFMset
+        , Boole.OnCircuit
+

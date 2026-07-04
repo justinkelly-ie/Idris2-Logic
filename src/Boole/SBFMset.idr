@@ -13,7 +13,7 @@ import Boole.BF2
 
 ||| Coordinate index for 1D logic wires
 public export
-data Coord1D = Wire
+Wdata Coord1D = Wire
 
 public export
 Eq Coord1D where

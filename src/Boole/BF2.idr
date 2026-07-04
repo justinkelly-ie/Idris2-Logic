@@ -1,50 +1,43 @@
 module Boole.BF2
 
 import Math.BoxInt
-import Math.Sing
+import Math.DepSing
+import Boole.Bit
 
 %default total
 
 -----------------------------------------------------------------------
 -- MODULO-2 LOGIC FIELD
 --
--- Redefined using Wildberger's recursive mset/singleton model.
+-- Defined using Wildberger's recursive mset/singleton model.
 -- The two elements of BF_2 ∈ {0,1} are represented as:
---   Z = Sing 0 = [] = ZeroS
---   O = Sing 1 = [[]] = OneS () 1
+--   Z = Bit with weight Zero = [] = (Zero ** MkDepSing () Zero)
+--   O = Bit with weight One  = [[]] = (One ** MkDepSing () One)
+--
+-- Uses Bit and Bit1 from Boole.Bit.
 -----------------------------------------------------------------------
 
 public export
 record BF2 where
   constructor MkBF2
-  content : Sing Integer ()
+  content : (w : BVal ** Bit () () w)
 
 public export
 Z : BF2
-Z = MkBF2 ZeroS
+Z = MkBF2 (Zero ** MkDepSing () Zero)
 
 public export
 O : BF2
-O = MkBF2 (OneS () 1)
+O = MkBF2 (One ** MkDepSing () One)
 
 public export
 normalize : BF2 -> BF2
-normalize (MkBF2 ZeroS) = Z
-normalize (MkBF2 (OneS () c)) =
-  if mod c 2 == 0
-    then Z
-    else O
+normalize (MkBF2 (Zero ** _)) = Z
+normalize (MkBF2 (One  ** _)) = O
 
 public export
 Eq BF2 where
-  (MkBF2 s1) == (MkBF2 s2) =
-    let count1 = case s1 of
-                   ZeroS => 0
-                   OneS () c => mod c 2
-        count2 = case s2 of
-                   ZeroS => 0
-                   OneS () c => mod c 2
-    in (count1 == 0 && count2 == 0) || (count1 == 1 && count2 == 1)
+  (MkBF2 (w1 ** _)) == (MkBF2 (w2 ** _)) = w1 == w2
 
 public export
 Show BF2 where
@@ -53,26 +46,16 @@ Show BF2 where
 ||| BOOLEAN RING EVALUATION: XOR Addition (1 + 1 = 0)
 public export
 addBF2 : BF2 -> BF2 -> BF2
-addBF2 x y =
-  let c1 = case content x of
-             ZeroS => 0
-             OneS () c => c
-      c2 = case content y of
-             ZeroS => 0
-             OneS () c => c
-  in normalize (MkBF2 (OneS () (c1 + c2)))
+addBF2 (MkBF2 (w1 ** b1)) (MkBF2 (w2 ** b2)) =
+  let sumBit = addBit b1 b2
+  in MkBF2 ((w1 + w2) ** sumBit)
 
 ||| AND Multiplication (1 * 1 = 1)
 public export
 mulBF2 : BF2 -> BF2 -> BF2
-mulBF2 x y =
-  let c1 = case content x of
-             ZeroS => 0
-             OneS () c => c
-      c2 = case content y of
-             ZeroS => 0
-             OneS () c => c
-  in normalize (MkBF2 (OneS () (c1 * c2)))
+mulBF2 (MkBF2 (w1 ** b1)) (MkBF2 (w2 ** b2)) =
+  let prodWeight = w1 * w2
+  in MkBF2 (prodWeight ** MkDepSing () prodWeight)
 
 public export
 Num BF2 where

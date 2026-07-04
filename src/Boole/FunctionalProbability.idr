@@ -47,28 +47,28 @@ totalAbsMass ZeroS = 0
 totalAbsMass (OneS _ c) = abs c
 
 -----------------------------------------------------------------------
--- 2. HEHNER FRACTION DEFINITION (Row 3 Complete Type)
+-- 2. MSET FRACTION VEXEL DEFINITION (Row 3 Complete Type)
 -----------------------------------------------------------------------
 
 ||| Row 3 complete fraction type.
 ||| Pairs a quantified multiset (numerator box) with its total universe sum (denominator box).
 public export
-record HehnerFraction (v : Type) where
-  constructor OverHehnerSpace
+record MSetFractionVexel (v : Type) where
+  constructor OverMSFSpace
   numeratorMset  : Sing BoxInt v
   denominatorSum : Sing1 BoxInt TrivialBase
 
-||| Smart constructor for HehnerFraction.
+||| Smart constructor for MSetFractionVexel.
 public export
-mkHehnerFraction : Sing BoxInt v -> BoxInt -> HehnerFraction v
-mkHehnerFraction m tot = OverHehnerSpace m (MkSing1 BaseAnchor tot)
+mkMSetFractionVexel : Sing BoxInt v -> BoxInt -> MSetFractionVexel v
+mkMSetFractionVexel m tot = OverMSFSpace m (MkSing1 BaseAnchor tot)
 
 ||| Extract the probability of a specific state in the normalised space.
 ||| Returns the probability as an MSetFraction.
 ||| If the total mass is zero (degenerate space), returns 0/1.
 public export
-stateProbability : Eq v => HehnerFraction v -> v -> MSetFraction
-stateProbability (OverHehnerSpace m den) s =
+stateProbability : Eq v => MSetFractionVexel v -> v -> MSetFraction
+stateProbability (OverMSFSpace m den) s =
   let (MkUr denVal) = boxToInt (count den)
       absDen = Math.Interfaces.integerToNat (abs denVal)
   in if absDen == 0
@@ -82,10 +82,10 @@ stateProbability (OverHehnerSpace m den) s =
     lookupWeight x (OneS y w) =
       if x == y then w else 0
 
-||| Normalize a HehnerFraction into a list of states and their corresponding probabilities.
+||| Normalize a MSetFractionVexel into a list of states and their corresponding probabilities.
 public export
-normalizeFraction : HehnerFraction v -> List (v, MSetFraction)
-normalizeFraction (OverHehnerSpace m den) =
+normalizeFraction : MSetFractionVexel v -> List (v, MSetFraction)
+normalizeFraction (OverMSFSpace m den) =
   let (MkUr denVal) = boxToInt (count den)
       absDen = Math.Interfaces.integerToNat (abs denVal)
   in if absDen == 0
@@ -96,12 +96,6 @@ normalizeFraction (OverHehnerSpace m den) =
     go ZeroS _ = []
     go (OneS elem wt) d =
       [(elem, MkMSF wt d)]
-
------------------------------------------------------------------------
--- 3. HEHNER NORMALISATION (Legacy API)
------------------------------------------------------------------------
-
-
 
 -----------------------------------------------------------------------
 -- 3. CALCULATIONAL QUANTIFIERS (min / max)
@@ -172,8 +166,8 @@ twoChildrenSpace =
 ||| Case A: "At least one child is a girl"
 ||| Filters the space, leaving 3 outcomes.
 public export
-atLeastOneGirl : HehnerFraction (Gender, Gender)
-atLeastOneGirl = mkHehnerFraction (OneS (Girl, Girl) 1) 3
+atLeastOneGirl : MSetFractionVexel (Gender, Gender)
+atLeastOneGirl = mkMSetFractionVexel (OneS (Girl, Girl) 1) 3
 
 ||| The probability that both are girls given at least one is a girl (evaluates to 1/3).
 public export
@@ -183,8 +177,8 @@ probBothGirlsGivenAtLeastOne = stateProbability atLeastOneGirl (Girl, Girl)
 ||| Case B: "The older child (first) is a girl"
 ||| Filters the space, leaving 2 outcomes.
 public export
-olderChildGirl : HehnerFraction (Gender, Gender)
-olderChildGirl = mkHehnerFraction (OneS (Girl, Girl) 1) 2
+olderChildGirl : MSetFractionVexel (Gender, Gender)
+olderChildGirl = mkMSetFractionVexel (OneS (Girl, Girl) 1) 2
 
 ||| The probability that both are girls given the older is a girl (evaluates to 1/2).
 public export
@@ -240,8 +234,8 @@ threeCardsSpace =
 
 ||| Filtered space where the observed side is Red (3 outcomes).
 public export
-observedRedSide : HehnerFraction (Card, Side)
-observedRedSide = mkHehnerFraction (OneS (CardRR, RedSide) 2) 3
+observedRedSide : MSetFractionVexel (Card, Side)
+observedRedSide = mkMSetFractionVexel (OneS (CardRR, RedSide) 2) 3
 
 ||| The probability that the other side is also red.
 ||| This is equivalent to checking if the card is CardRR (evaluates to 2/3).
