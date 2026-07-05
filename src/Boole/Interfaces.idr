@@ -4,6 +4,7 @@ import Data.Vect
 import Data.Linear
 import Math.Interfaces
 import Boole.Bit
+import Math.Sing
 
 %default total
 
@@ -15,8 +16,9 @@ import Boole.Bit
 public export
 bvalsToIntegers : List BVal -> List Integer
 bvalsToIntegers [] = []
-bvalsToIntegers (Zero :: xs) = 0 :: bvalsToIntegers xs
-bvalsToIntegers (One :: xs) = 1 :: bvalsToIntegers xs
+bvalsToIntegers (ZeroS :: xs) = 0 :: bvalsToIntegers xs
+bvalsToIntegers (OneS () n :: xs) = n :: bvalsToIntegers xs
+bvalsToIntegers (_ :: xs) = 0 :: bvalsToIntegers xs
 
 ||| Converts a list of Integers to BVals (mod 2).
 public export

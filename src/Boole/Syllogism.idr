@@ -13,25 +13,40 @@ import Boole.Byte
 -----------------------------------------------------------------------
 
 public export
-data Predication : Type where
-  EveryQisP  : Predication
-  NoQisP     : Predication
-  SomeQisP   : Predication
-  SomeQnotP  : Predication
+0 Predication : Type
+Predication = Nat
 
 public export
-Show Predication where
-  show EveryQisP  = "Every Q is a P"
-  show NoQisP     = "No Q is a P"
-  show SomeQisP   = "Some Q is a P"
-  show SomeQnotP  = "Some Q is not a P"
+EveryQisP  : Predication
+EveryQisP  = 0
 
 public export
-checkPredication : {n : Nat} -> Predication -> Byte n -> Byte n -> Bool
-checkPredication EveryQisP  q p = everyQisP q p
-checkPredication NoQisP     q p = noQisP q p
-checkPredication SomeQisP   q p = someQisP q p
-checkPredication SomeQnotP  q p = someQnotP q p
+NoQisP     : Predication
+NoQisP     = 1
+
+public export
+SomeQisP   : Predication
+SomeQisP   = 2
+
+public export
+SomeQnotP  : Predication
+SomeQnotP  = 3
+
+public export
+showPredication : Predication -> String
+showPredication 0 = "Every Q is a P"
+showPredication 1 = "No Q is a P"
+showPredication 2 = "Some Q is a P"
+showPredication 3 = "Some Q is not a P"
+showPredication _ = "Unknown predication"
+
+public export
+checkPredication : Eq state => Predication -> Byte state -> Byte state -> Bool
+checkPredication 0  q p = everyQisP q p
+checkPredication 1  q p = noQisP q p
+checkPredication 2  q p = someQisP q p
+checkPredication 3  q p = someQnotP q p
+checkPredication _  _ _ = False
 
 -----------------------------------------------------------------------
 -- FIRST FIGURE
@@ -39,7 +54,7 @@ checkPredication SomeQnotP  q p = someQnotP q p
 
 ||| Barbara: Every B is A, Every C is B ⊢ Every C is A.
 public export
-barbara : {n : Nat} -> (a, b, c : Byte n) -> Bool
+barbara : Eq state => (a, b, c : Byte state) -> Bool
 barbara a b c =
   if everyQisP b a && everyQisP c b
   then everyQisP c a
@@ -47,7 +62,7 @@ barbara a b c =
 
 ||| Celarent: No B is A, Every C is B ⊢ No C is A.
 public export
-celarent : {n : Nat} -> (a, b, c : Byte n) -> Bool
+celarent : Eq state => (a, b, c : Byte state) -> Bool
 celarent a b c =
   if noQisP b a && everyQisP c b
   then noQisP c a
@@ -55,7 +70,7 @@ celarent a b c =
 
 ||| Darii: Every B is A, Some C is B ⊢ Some C is A.
 public export
-darii : {n : Nat} -> (a, b, c : Byte n) -> Bool
+darii : Eq state => (a, b, c : Byte state) -> Bool
 darii a b c =
   if everyQisP b a && someQisP c b
   then someQisP c a
@@ -63,7 +78,7 @@ darii a b c =
 
 ||| Ferio: No B is A, Some C is B ⊢ Some C is not A.
 public export
-ferio : {n : Nat} -> (a, b, c : Byte n) -> Bool
+ferio : Eq state => (a, b, c : Byte state) -> Bool
 ferio a b c =
   if noQisP b a && someQisP c b
   then someQnotP c a
@@ -74,14 +89,14 @@ ferio a b c =
 -----------------------------------------------------------------------
 
 public export
-cesare : {n : Nat} -> (p, m, s : Byte n) -> Bool
+cesare : Eq state => (p, m, s : Byte state) -> Bool
 cesare p m s =
   if noQisP p m && everyQisP s m
   then noQisP s p
   else True
 
 public export
-camestres : {n : Nat} -> (p, m, s : Byte n) -> Bool
+camestres : Eq state => (p, m, s : Byte state) -> Bool
 camestres p m s =
   if everyQisP p m && noQisP s m
   then noQisP s p
@@ -96,32 +111,32 @@ camestres p m s =
 public export
 modusPonens : BVal -> BVal -> BVal
 modusPonens p q =
-  let premise = mulBVal p (One + p + mulBVal p q)
-  in case premise of
-       Zero => One
-       One  => q
+  let premise = p * (One + p + p * q)
+  in if premise == Zero
+     then One
+     else q
 
 ||| Modus Tollens: P→Q, ¬Q ⊢ ¬P.
 public export
 modusTollens : BVal -> BVal -> BVal
 modusTollens p q =
-  let implication = One + p + mulBVal p q
+  let implication = One + p + p * q
       notQ = One + q
-      premise = mulBVal implication notQ
+      premise = implication * notQ
       notP = One + p
-  in case premise of
-       Zero => One
-       One  => notP
+  in if premise == Zero
+     then One
+     else notP
 
 -----------------------------------------------------------------------
 -- GENERIC VERIFICATION
 -----------------------------------------------------------------------
 
 public export
-verifySyllogism : {n : Nat}
-              -> (Predication, Byte n, Byte n)
-              -> (Predication, Byte n, Byte n)
-              -> (Predication, Byte n, Byte n)
+verifySyllogism : Eq state
+              => (Predication, Byte state, Byte state)
+              -> (Predication, Byte state, Byte state)
+              -> (Predication, Byte state, Byte state)
               -> Bool
 verifySyllogism (pred1, q1, p1) (pred2, q2, p2) (conc, qc, pc) =
   if checkPredication pred1 q1 p1 && checkPredication pred2 q2 p2

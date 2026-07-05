@@ -9,15 +9,12 @@ import Boole.BF2
 %default total
 
 public export
-data TrivialBase = BaseAnchor
+0 TrivialBase : Type
+TrivialBase = Nat
 
 public export
-Eq TrivialBase where
-  BaseAnchor == BaseAnchor = True
-
-public export
-Show TrivialBase where
-  show BaseAnchor = "BaseAnchor"
+BaseAnchor : TrivialBase
+BaseAnchor = 0
 
 
 ||| A type alias for a Singleton Bit-Gate Multiset.

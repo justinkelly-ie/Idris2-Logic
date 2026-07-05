@@ -4,6 +4,7 @@ import Math.Multiset
 import Math.BoxInt
 import Math.IntPolynumber
 import Math.SignedFraction
+import Math.Sing
 import Boole.Bit
 import Boole.Polynumber
 import Boole.MobiusTransform
@@ -30,8 +31,9 @@ import Boole.MobiusTransform
 ||| Zero ↦ 0,  One ↦ 1.
 public export
 bvalToBoxInt : BVal -> BoxInt
-bvalToBoxInt Zero = 0
-bvalToBoxInt One  = 1
+bvalToBoxInt ZeroS = 0
+bvalToBoxInt (OneS () 1) = 1
+bvalToBoxInt _ = 0
 
 ||| Embed a BVal list (truth table or coefficient vector) into BoxInt list.
 public export

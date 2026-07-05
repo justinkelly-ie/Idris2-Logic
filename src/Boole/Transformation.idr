@@ -5,6 +5,7 @@ import Math.Sing
 import Math.Vexel
 import Boole.BF2
 import Boole.SingFraction
+import Boole.Byte
 
 %default total
 
@@ -15,13 +16,13 @@ data LogicState state = VarState state | ConstState TrivialBase
 public export
 Eq state => Eq (LogicState state) where
   (VarState x) == (VarState y) = x == y
-  (ConstState BaseAnchor) == (ConstState BaseAnchor) = True
+  (ConstState x) == (ConstState y) = x == y
   _ == _ = False
 
 public export
 Show state => Show (LogicState state) where
   show (VarState x) = show x
-  show (ConstState BaseAnchor) = "1"
+  show (ConstState x) = if x == BaseAnchor then "1" else show x
 
 ||| The Transformation MSet (Logic Gate Operator):
 ||| A multiset of logical relations.
@@ -111,32 +112,21 @@ applyTransformation inputState (AddM (MkSingRelation src tgt) w rest) =
 -- VEXEL IMPLEMENTATION FOR BOOLE LOGIC (ROW 1 & 2)
 -----------------------------------------------------------------------
 
-||| A Vexel representing logical state inputs/outputs (Row 1).
-||| Defined as a list of singleton bit-gates.
+||| Wrap a single bit-gate singleton multiset into a Byte vector.
 public export
-0 LogicVexel : (state : Type) -> Type
-LogicVexel state = Vexel BF2 state
+toByte : SingBitGateMset state -> Byte state
+toByte ZeroS = []
+toByte (OneS s w) = [OneS s w]
 
-||| Wrap a single bit-gate singleton multiset into a LogicVexel.
+||| Apply a Transformation MSet (Maxel) to a Byte vector input.
+||| Since Byte is a list of singletons, we map applyTransformation over the elements
+||| and accumulate the result using addByte.
 public export
-toLogicVexel : SingBitGateMset state -> LogicVexel state
-toLogicVexel ZeroS = []
-toLogicVexel (OneS s w) = [OneS s w]
-
-||| Add two logic vexels together using the modulo-2 collapse rule.
-public export
-addLogicVexels : Eq state => LogicVexel state -> LogicVexel state -> LogicVexel state
-addLogicVexels = addVexels
-
-||| Apply a Transformation MSet (Maxel) to a LogicVexel input.
-||| Since LogicVexel is a list of singletons, we map applyTransformation over the elements
-||| and accumulate the result using addLogicVexels.
-public export
-applyTransformationVexel : Eq state => LogicVexel state -> TransformationMSet state -> LogicVexel state
+applyTransformationVexel : Eq state => Byte state -> TransformationMSet state -> Byte state
 applyTransformationVexel [] _ = []
 applyTransformationVexel (x :: xs) trans =
   let res = applyTransformation x trans
       tailRes = applyTransformationVexel xs trans
-  in addLogicVexels (toLogicVexel res) tailRes
+  in addByte (toByte res) tailRes
 
 

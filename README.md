@@ -77,7 +77,6 @@ The function `liftToRow2` lifts a `BooleFraction` (with mod-2 $F_2$ coefficients
 | [Boole.Circuit](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Circuit.idr) | Circuit AST representation, primitive/derived gate translation, and complexity counting. |
 | [Boole.Bit](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Bit.idr) | Dependent witness linear types for B₂ values. |
 | [Boole.Byte](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Byte.idr) | B₂ⁿ vector coordinate spaces. |
-| [Boole.Connective](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Connective.idr) | Algebraic definition of all 16 binary logic connectives. |
 | [Boole.Syllogism](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Syllogism.idr) | Classical syllogistic logic (Barbara, Celarent, Ferio) evaluated algebraically. |
 | [Boole.Interfaces](file:///var/home/justin/Projects/Idris2-Boole/src/Boole/Interfaces.idr) | Linear logic interfaces (`LConsumable`, `LComonoid`, `LEq`). |
 

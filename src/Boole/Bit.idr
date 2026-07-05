@@ -3,72 +3,66 @@ module Boole.Bit
 import Data.Linear
 import Math.Interfaces
 import Math.DepSing
+import Math.Sing
 
 %default total
 
 -----------------------------------------------------------------------
--- THE BY-FIELD B₂
+-- THE BY-FIELD B₂ OVER SINGLETON MULTISETS
 --
--- Wildberger's "by-field" — the two-element field {0, 1} with
--- addition mod 2 (XOR) and multiplication mod 2 (AND).
---
--- BVal is the algebraic type (like SignedUnit for BoxInt).
--- Bit is the dependent witness indexed by BVal.
---
--- Fundamental laws:
---   x + x = Zero   (self-inverse under addition)
---   x * x = x      (idempotent — Boole's law)
+-- Modeled using Wildberger's multiset/singleton theory.
+-- BVal is a singleton multiset over the unit coordinate type ()
+-- with Integer coefficient.
 -----------------------------------------------------------------------
 
-||| The two elements of the by-field B₂.
-||| Analogous to SignedUnit (Pos | Neg) in BoxInt.
+||| The two elements of the by-field B₂ represented as a multiset.
 public export
-data BVal : Type where
-  Zero : BVal
-  One  : BVal
+BVal : Type
+BVal = Sing Integer ()
 
+public export
+Zero : BVal
+Zero = ZeroS
+
+public export
+One : BVal
+One = OneS () 1
 
 -----------------------------------------------------------------------
 -- BVAL EQUALITY & DISPLAY
 -----------------------------------------------------------------------
 
 public export
-Eq BVal where
-  Zero == Zero = True
-  One  == One  = True
-  _    == _    = False
-
-public export
 Ord BVal where
-  compare Zero Zero = EQ
-  compare Zero One  = LT
-  compare One  Zero = GT
-  compare One  One  = EQ
+  compare ZeroS ZeroS = EQ
+  compare ZeroS (OneS () 1) = LT
+  compare (OneS () 1) ZeroS = GT
+  compare (OneS () 1) (OneS () 1) = EQ
+  compare _ _ = EQ
 
 public export
 Show BVal where
-  show Zero = "0"
-  show One  = "1"
+  show ZeroS = "0"
+  show (OneS () 1) = "1"
+  show _ = "0"
 
 -----------------------------------------------------------------------
 -- BY-FIELD ARITHMETIC (mod 2) on BVal
 -----------------------------------------------------------------------
 
 ||| Addition in B₂ (exclusive or).
-||| Zero + Zero = Zero,  Zero + One = One,
-||| One + Zero = One,    One + One = Zero.
 public export
 addBVal : BVal -> BVal -> BVal
-addBVal Zero Zero = Zero
-addBVal Zero One  = One
-addBVal One  Zero = One
-addBVal One  One  = Zero
+addBVal ZeroS y = y
+addBVal x ZeroS = x
+addBVal (OneS () 1) (OneS () 1) = ZeroS
+addBVal _ _ = ZeroS
 
 ||| Multiplication in B₂ (logical and).
 public export
 mulBVal : BVal -> BVal -> BVal
-mulBVal One One = One
-mulBVal _   _   = Zero
+mulBVal (OneS () 1) (OneS () 1) = OneS () 1
+mulBVal _ _ = ZeroS
 
 ||| Negation in B₂ is the identity: -x = x.
 public export
@@ -83,7 +77,7 @@ public export
 Num BVal where
   (+) = addBVal
   (*) = mulBVal
-  fromInteger n = if mod n 2 == 0 then Zero else One
+  fromInteger n = if mod n 2 == 0 then ZeroS else OneS () 1
 
 public export
 Neg BVal where
@@ -96,19 +90,21 @@ Neg BVal where
 
 public export
 bvalToNat : BVal -> Nat
-bvalToNat Zero = Z
-bvalToNat One  = S Z
+bvalToNat ZeroS = Z
+bvalToNat (OneS () 1) = S Z
+bvalToNat _ = Z
 
 public export
 natToBVal : Nat -> BVal
-natToBVal Z     = Zero
-natToBVal (S Z) = One
+natToBVal Z     = ZeroS
+natToBVal (S Z) = OneS () 1
 natToBVal (S (S k)) = natToBVal k
 
 public export
 bvalToInteger : BVal -> Integer
-bvalToInteger Zero = 0
-bvalToInteger One  = 1
+bvalToInteger ZeroS = 0
+bvalToInteger (OneS () 1) = 1
+bvalToInteger _ = 0
 
 -----------------------------------------------------------------------
 -- ABSOLUTE VALUE
@@ -124,20 +120,23 @@ Abs BVal where
 
 public export
 LConsumable BVal where
-  lconsume Zero = ()
-  lconsume One  = ()
+  lconsume ZeroS = ()
+  lconsume (OneS () n) = ()
 
 public export
 LComonoid BVal where
-  lcomult Zero = Builtin.(#) Zero Zero
-  lcomult One  = Builtin.(#) One One
+  lcomult ZeroS = Builtin.(#) ZeroS ZeroS
+  lcomult (OneS () n) = Builtin.(#) (OneS () n) (OneS () n)
 
 public export
 LEq BVal where
-  lEq Zero Zero = Builtin.(#) True  (Builtin.(#) Zero Zero)
-  lEq One  One  = Builtin.(#) True  (Builtin.(#) One  One)
-  lEq Zero One  = Builtin.(#) False (Builtin.(#) Zero One)
-  lEq One  Zero = Builtin.(#) False (Builtin.(#) One  Zero)
+  lEq ZeroS ZeroS = Builtin.(#) True  (Builtin.(#) ZeroS ZeroS)
+  lEq (OneS () n) (OneS () m) =
+    if n == m
+      then Builtin.(#) True  (Builtin.(#) (OneS () n) (OneS () m))
+      else Builtin.(#) False (Builtin.(#) (OneS () n) (OneS () m))
+  lEq ZeroS (OneS () n) = Builtin.(#) False (Builtin.(#) ZeroS (OneS () n))
+  lEq (OneS () n) ZeroS = Builtin.(#) False (Builtin.(#) (OneS () n) ZeroS)
 
 -----------------------------------------------------------------------
 -- DEPENDENT BIT DEFINITIONS (Box Arithmetic Layer 1)
@@ -165,9 +164,9 @@ addBit (MkDepSing x w1) (MkDepSing x w2) = MkDepSing x (w1 + w2)
 ||| Addition of a dependent bit and a dependent Bit1 at the same coordinate.
 public export
 addBitBit1 : {x : a} -> Bit a x w -> Bit1 a x -> Bit a x (w + One)
-addBitBit1 (MkDepSing x w) (MkDepSing x One, Refl) = MkDepSing x (w + One)
+addBitBit1 (MkDepSing x w) _ = MkDepSing x (w + One)
 
 ||| Addition of two dependent Bit1 elements at the same coordinate.
 public export
 addBit1Bit1 : {x : a} -> Bit1 a x -> Bit1 a x -> Bit a x Zero
-addBit1Bit1 (MkDepSing x One, Refl) (MkDepSing x One, Refl) = MkDepSing x Zero
+addBit1Bit1 _ _ = MkDepSing x Zero

@@ -133,8 +133,11 @@ denseToSparse = go 0
   where
     go : Nat -> List BVal -> Multiset BVal Nat
     go _ [] = ZeroM
-    go idx (Zero :: rest) = go (S idx) rest
-    go idx (One :: rest) = AddM idx One (go (S idx) rest)
+    go idx (ZeroS :: rest) = go (S idx) rest
+    go idx (OneS () n :: rest) =
+      if n == 1
+        then AddM idx One (go (S idx) rest)
+        else go (S idx) rest
 
 ||| Sparse multiset to dense list.
 public export
@@ -202,6 +205,10 @@ showBoolePoly p = go p
   where
     go : BoolePolynumber -> String
     go ZeroM = ""
-    go (AddM k One ZeroM) = showTerm k
-    go (AddM _ Zero rest) = go rest
-    go (AddM k One rest) = showTerm k ++ " + " ++ go rest
+    go (AddM k (OneS () n) ZeroM) = if n == 1 then showTerm k else ""
+    go (AddM _ ZeroS rest) = go rest
+    go (AddM k (OneS () n) rest) =
+      if n == 1
+        then showTerm k ++ " + " ++ go rest
+        else go rest
+    go (AddM _ _ rest) = go rest

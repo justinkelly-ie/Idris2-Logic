@@ -7,3 +7,13 @@ ipkg = "idris2-Boole.ipkg"
 type = "local"
 path = "../idris2-Multiset"
 ipkg = "idris2-Multiset.ipkg"
+
+[custom.all.idris2-Boole-test]
+type = "local"
+path = "."
+ipkg = "idris2-Boole-test.ipkg"
+
+[custom.all.idris2-QuickCheck]
+type = "local"
+path = "../idris2-QuickCheck"
+ipkg = "idris2-QuickCheck.ipkg"

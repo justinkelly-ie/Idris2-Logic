@@ -7,6 +7,7 @@ import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
 import Math.OnSeq.OnMSet
+import Math.Sing
 import Boole.Bit
 import Boole.Polynumber
 

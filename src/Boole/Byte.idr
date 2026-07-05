@@ -1,22 +1,32 @@
 module Boole.Byte
 
-import Data.Vect
-import Boole.Bit
+import Data.List
+import public Math.Sing
+import public Math.Sing1
+import public Math.Vexel
+import public Math.DepVexel
+import public Math.DepSing
+import public Boole.BF2
+import public Boole.Bit
 
 %default total
 
 -----------------------------------------------------------------------
--- BOOLE ALGEBRA B₂ⁿ
+-- BOOLE ALGEBRA OVER VEXELS (MULTISETS)
 --
--- An N-dimensional vector over the by-field B₂.
--- Represents a property assignment over a population of N objects.
--- Operations are pointwise by-field arithmetic.
+-- A Vexel representing logical state inputs/outputs.
+-- Defined as a list of singleton bit-gates over BF2.
 -----------------------------------------------------------------------
 
-||| An N-dimensional Boole vector. Each component is a BVal.
+||| A Byte is a one-dimensional logic vector represented as a Vexel BF2 state.
 public export
-Byte : Nat -> Type
-Byte n = Vect n BVal
+0 Byte : (state : Type) -> Type
+Byte state = Vexel BF2 state
+
+||| A dependently typed Byte tracking coordinates at compile time.
+public export
+0 DepByte : (state : Type) -> (xs : Vexel BF2 state) -> Type
+DepByte state xs = DepVexel BF2 state (vexelToMSet xs)
 
 -----------------------------------------------------------------------
 -- VECTOR ARITHMETIC
@@ -24,33 +34,48 @@ Byte n = Vect n BVal
 
 ||| Pointwise addition (XOR) of two Boole vectors.
 public export
-addByte : Byte n -> Byte n -> Byte n
-addByte [] [] = []
-addByte (x :: xs) (y :: ys) = addBVal x y :: addByte xs ys
+addByte : (Eq state) => Byte state -> Byte state -> Byte state
+addByte = addVexels
+
+||| Helper to lookup the weight of a state coordinate in a Byte.
+public export
+lookupWeight : Eq state => state -> Byte state -> BF2
+lookupWeight _ [] = Z
+lookupWeight x (ZeroS :: rest) = lookupWeight x rest
+lookupWeight x (OneS y w :: rest) =
+  if x == y then w + lookupWeight x rest else lookupWeight x rest
 
 ||| Pointwise multiplication (AND) of two Boole vectors.
 public export
-mulByte : Byte n -> Byte n -> Byte n
-mulByte [] [] = []
-mulByte (x :: xs) (y :: ys) = mulBVal x y :: mulByte xs ys
+mulByte : (Eq state) => Byte state -> Byte state -> Byte state
+mulByte [] _ = []
+mulByte (ZeroS :: xs) ys = ZeroS :: mulByte xs ys
+mulByte (OneS x w1 :: xs) ys =
+  let w2 = lookupWeight x ys
+      prod = w1 * w2
+  in if prod == Z
+       then mulByte xs ys
+       else OneS x prod :: mulByte xs ys
 
-||| Scalar multiplication: multiply every component by a BVal.
+||| Scalar multiplication: multiply every component by a BF2.
 public export
-scaleByte : BVal -> Byte n -> Byte n
+scaleByte : BF2 -> Byte state -> Byte state
 scaleByte _ [] = []
-scaleByte s (x :: xs) = mulBVal s x :: scaleByte s xs
+scaleByte s (ZeroS :: xs) = ZeroS :: scaleByte s xs
+scaleByte s (OneS x w :: xs) =
+  let prod = s * w in
+  if prod == Z then scaleByte s xs else OneS x prod :: scaleByte s xs
 
-||| The zero vector in B₂ⁿ.
+||| The zero vector.
 public export
-zeroByte : {n : Nat} -> Byte n
-zeroByte {n = Z} = []
-zeroByte {n = S k} = Zero :: zeroByte
+zeroByte : Byte state
+zeroByte = []
 
-||| The one vector in B₂ⁿ (all components One).
+||| The one vector (all components One) relative to a finite domain of states.
 public export
-oneByte : {n : Nat} -> Byte n
-oneByte {n = Z} = []
-oneByte {n = S k} = One :: oneByte
+oneByte : List state -> Byte state
+oneByte [] = []
+oneByte (x :: xs) = OneS x O :: oneByte xs
 
 -----------------------------------------------------------------------
 -- PREDICATES
@@ -58,51 +83,46 @@ oneByte {n = S k} = One :: oneByte
 
 ||| Test whether a Boole vector is the zero vector.
 public export
-isZeroByte : Byte n -> Bool
+isZeroByte : Byte state -> Bool
 isZeroByte [] = True
-isZeroByte (Zero :: xs) = isZeroByte xs
-isZeroByte (One :: _) = False
+isZeroByte (ZeroS :: xs) = isZeroByte xs
+isZeroByte (OneS _ w :: xs) = (w == Z) && isZeroByte xs
 
 ||| Test whether a Boole vector is nonzero.
 public export
-isNonZeroByte : Byte n -> Bool
+isNonZeroByte : Byte state -> Bool
 isNonZeroByte v = not (isZeroByte v)
 
 -----------------------------------------------------------------------
 -- ARISTOTLE'S FOUR SYLLOGISTIC FORMS
---
--- NOT P = 1 + P  (derived from addition, not a primitive)
 -----------------------------------------------------------------------
 
-||| Every Q is a P: Q·(1+P) = 0.
+||| Every Q is a P: Every active coordinate in Q is active in P.
 public export
-everyQisP : {n : Nat} -> Byte n -> Byte n -> Bool
-everyQisP q p = isZeroByte (mulByte q (addByte oneByte p))
+everyQisP : Eq state => Byte state -> Byte state -> Bool
+everyQisP [] _ = True
+everyQisP (ZeroS :: xs) ys = everyQisP xs ys
+everyQisP (OneS x w :: xs) ys =
+  if w == O
+  then (lookupWeight x ys == O) && everyQisP xs ys
+  else everyQisP xs ys
 
-||| No Q is a P: Q·P = 0.
+||| No Q is a P: Q · P = 0.
 public export
-noQisP : Byte n -> Byte n -> Bool
+noQisP : Eq state => Byte state -> Byte state -> Bool
 noQisP q p = isZeroByte (mulByte q p)
 
-||| Some Q is a P: Q·P ≠ 0.
+||| Some Q is a P: Q · P ≠ 0.
 public export
-someQisP : Byte n -> Byte n -> Bool
+someQisP : Eq state => Byte state -> Byte state -> Bool
 someQisP q p = isNonZeroByte (mulByte q p)
 
-||| Some Q is not a P: Q·(1+P) ≠ 0.
+||| Some Q is not a P: Some active coordinate in Q is not active in P.
 public export
-someQnotP : {n : Nat} -> Byte n -> Byte n -> Bool
-someQnotP q p = isNonZeroByte (mulByte q (addByte oneByte p))
-
------------------------------------------------------------------------
--- DISPLAY
------------------------------------------------------------------------
-
-export
-Show (Byte n) where
-  show v = "(" ++ showInner v ++ ")"
-    where
-      showInner : Byte m -> String
-      showInner [] = ""
-      showInner [x] = show x
-      showInner (x :: xs) = show x ++ "," ++ showInner xs
+someQnotP : Eq state => Byte state -> Byte state -> Bool
+someQnotP [] _ = False
+someQnotP (ZeroS :: xs) ys = someQnotP xs ys
+someQnotP (OneS x w :: xs) ys =
+  if w == O && lookupWeight x ys == Z
+  then True
+  else someQnotP xs ys

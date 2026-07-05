@@ -4,7 +4,7 @@ import Data.List
 import Math.Multiset
 import Math.IntPolynumber
 import Boole.Bit
-import Boole.Polynumber
+import public Boole.Polynumber
 import Boole.Bridge
 
 %default total

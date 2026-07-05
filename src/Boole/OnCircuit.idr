@@ -49,52 +49,27 @@ evalOnCircuit = zipWith evalBoolePoly
 -- UNBOUNDED LOGIC VARIABLES (OnByte)
 -----------------------------------------------------------------------
 
-||| An ongoing byte coordinate (unbounded logic vector) where the length of the vector
-||| grows with the sequence index.
+||| An ongoing byte coordinate sequence (unbounded logic vector).
 public export
-0 OnByte : Type
-OnByte = OnSeq (List BVal)
-
-||| Pointwise addition (XOR) of two lists of BVals.
-public export
-addListBVal : List BVal -> List BVal -> List BVal
-addListBVal [] ys = ys
-addListBVal xs [] = xs
-addListBVal (x :: xs) (y :: ys) = addBVal x y :: addListBVal xs ys
+0 OnByte : (state : Type) -> Type
+OnByte state = OnSeq (Byte state)
 
 ||| Pointwise addition of two ongoing byte coordinate sequences.
 public export
-addOnByte : OnByte -> OnByte -> OnByte
-addOnByte = zipWith addListBVal
-
-||| Pointwise multiplication (AND) of two lists of BVals.
-public export
-mulListBVal : List BVal -> List BVal -> List BVal
-mulListBVal [] _ = []
-mulListBVal _ [] = []
-mulListBVal (x :: xs) (y :: ys) = mulBVal x y :: mulListBVal xs ys
+addOnByte : (Eq state) => OnByte state -> OnByte state -> OnByte state
+addOnByte = Math.OnSeq.OnMSet.zipWith addByte
 
 ||| Pointwise multiplication of two ongoing byte coordinate sequences.
 public export
-mulOnByte : OnByte -> OnByte -> OnByte
-mulOnByte = zipWith mulListBVal
+mulOnByte : (Eq state) => OnByte state -> OnByte state -> OnByte state
+mulOnByte = Math.OnSeq.OnMSet.zipWith mulByte
 
 ||| Pointwise check if components are all zero.
 public export
-isZeroOnByte : OnByte -> OnSeq Bool
-isZeroOnByte = map isZeroList
-  where
-    isZeroList : List BVal -> Bool
-    isZeroList [] = True
-    isZeroList (Zero :: xs) = isZeroList xs
-    isZeroList (One :: _) = False
+isZeroOnByte : OnByte state -> OnSeq Bool
+isZeroOnByte = Math.OnSeq.OnMSet.map isZeroByte
 
 ||| Pointwise check if any component is non-zero.
 public export
-isNonZeroOnByte : OnByte -> OnSeq Bool
-isNonZeroOnByte = map (not . isZeroList)
-  where
-    isZeroList : List BVal -> Bool
-    isZeroList [] = True
-    isZeroList (Zero :: xs) = isZeroList xs
-    isZeroList (One :: _) = False
+isNonZeroOnByte : OnByte state -> OnSeq Bool
+isNonZeroOnByte = Math.OnSeq.OnMSet.map isNonZeroByte

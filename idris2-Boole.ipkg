@@ -1,12 +1,12 @@
 package idris2-Boole
-version = 0.1.0
+version = 0.1.1
 authors = "Justin"
 
 depends = base, contrib, linear, idris2-Multiset
 
 sourcedir = "src"
 
-modules = Boole.Bit, Boole.Byte, Boole.Connective
+modules = Boole.Bit, Boole.Byte
         , Boole.Polynumber, Boole.MobiusTransform
         , Boole.Circuit, Boole.Syllogism
         , Boole.Interfaces
@@ -18,4 +18,5 @@ modules = Boole.Bit, Boole.Byte, Boole.Connective
         , Boole.Transformation
         , Boole.SBFMset
         , Boole.OnCircuit
+        , Boole.BooleFunction
 

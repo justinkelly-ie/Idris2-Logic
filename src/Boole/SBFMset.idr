@@ -13,21 +13,25 @@ import Boole.BF2
 
 ||| Coordinate index for 1D logic wires
 public export
-Wdata Coord1D = Wire
+0 Coord1D : Type
+Coord1D = Nat
 
 public export
-Eq Coord1D where
-  Wire == Wire = True
+Wire : Coord1D
+Wire = 0
 
 ||| Coordinate index for 2D spatial metrics
 public export
-data Coord2D = X | Y
+0 Coord2D : Type
+Coord2D = Nat
 
 public export
-Eq Coord2D where
-  X == X = True
-  Y == Y = True
-  _ == _ = False
+X : Coord2D
+X = 0
+
+public export
+Y : Coord2D
+Y = 1
 
 -----------------------------------------------------------------------
 -- 2. STATIC SBFMSET METRIC TEMPLATES
