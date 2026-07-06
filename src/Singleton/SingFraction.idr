@@ -1,10 +1,9 @@
-module Boole.SingFraction
+module Singleton.SingFraction
 
 import Math.Multiset
 import Math.Sing
-import Math.Sing1
 import Math.BoxInt
-import Boole.BF2
+import Singleton.BF2
 
 %default total
 

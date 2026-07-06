@@ -1,4 +1,4 @@
-module Boole.Bit
+module Singleton.Bit
 
 import Data.Linear
 import Math.Interfaces

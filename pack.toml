@@ -1,17 +1,22 @@
-[custom.all.idris2-Boole]
+[custom.all.idris2-Singleton]
 type = "local"
 path = "."
-ipkg = "idris2-Boole.ipkg"
+ipkg = "idris2-Singleton.ipkg"
 
 [custom.all.idris2-Multiset]
 type = "local"
 path = "../idris2-Multiset"
 ipkg = "idris2-Multiset.ipkg"
 
-[custom.all.idris2-Boole-test]
+[custom.all.idris2-Singleton-test]
 type = "local"
 path = "."
-ipkg = "idris2-Boole-test.ipkg"
+ipkg = "idris2-Singleton-test.ipkg"
+
+[custom.all.idris2-Vexel]
+type = "local"
+path = "../Idris2-Vexel"
+ipkg = "idris2-Vexel.ipkg"
 
 [custom.all.idris2-QuickCheck]
 type = "local"

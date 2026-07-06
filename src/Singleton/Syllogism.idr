@@ -1,8 +1,8 @@
-module Boole.Syllogism
+module Singleton.Syllogism
 
 import Data.Vect
-import Boole.Bit
-import Boole.Byte
+import Singleton.Bit
+import Vexel.Byte
 
 %default total
 

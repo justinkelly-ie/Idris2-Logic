@@ -1,10 +1,10 @@
-module Boole.Polynumber
+module Singleton.Polynumber
 
 import Data.List
 import Data.Nat
 import Math.Multiset
-import Boole.Bit
-import Boole.Byte
+import Singleton.Bit
+import Vexel.Byte
 
 %default covering
 

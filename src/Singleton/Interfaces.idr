@@ -1,9 +1,9 @@
-module Boole.Interfaces
+module Singleton.Interfaces
 
 import Data.Vect
 import Data.Linear
 import Math.Interfaces
-import Boole.Bit
+import Singleton.Bit
 import Math.Sing
 
 %default total

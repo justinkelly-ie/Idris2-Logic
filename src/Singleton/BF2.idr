@@ -1,8 +1,8 @@
-module Boole.BF2
+module Singleton.BF2
 
 import Math.Sing
 import Math.BoxInt
-import public Boole.Bit
+import public Singleton.Bit
 
 %default total
 

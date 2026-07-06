@@ -4,25 +4,24 @@ import QuickCheck
 import Data.List
 import Math.Multiset
 import Math.Sing
-import Math.Sing1
 import Math.Pixel
 import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
 import Math.Vexel
 import Math.DepVexel
-import Boole.Bit
-import Boole.BF2
-import Boole.Byte
-import Boole.Polynumber
-import Boole.Circuit
-import Boole.MobiusTransform
-import Boole.SBFMset
-import Boole.SingFraction
-import Boole.Syllogism
-import Boole.Transformation
-import Boole.LiftedPolynumber
-import Boole.BooleFunction
+import Singleton.Bit
+import Singleton.BF2
+import Singleton.Polynumber
+import Singleton.Circuit
+import Singleton.MobiusTransform
+import Singleton.SBFMset
+import Singleton.SingFraction
+import Singleton.Syllogism
+import Singleton.LiftedPolynumber
+import Singleton.BooleFunction
+import Vexel.Byte
+import Vexel.Transformation
 
 %default total
 
@@ -77,11 +76,11 @@ prop_bf2AddCommutative = forAll {a = (TestBF2, TestBF2)} {prop = Bool} arbitrary
 
 prop_bf2AddIdentity : Property
 prop_bf2AddIdentity = forAll {a = TestBF2} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x) =>
-  Prelude.(+) x Boole.BF2.Z == x))
+  Prelude.(+) x Singleton.BF2.Z == x))
 
 prop_bf2AddSelfAnnihilate : Property
 prop_bf2AddSelfAnnihilate = forAll {a = TestBF2} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x) =>
-  Prelude.(+) x x == Boole.BF2.Z))
+  Prelude.(+) x x == Singleton.BF2.Z))
 
 prop_bf2MulCommutative : Property
 prop_bf2MulCommutative = forAll {a = (TestBF2, TestBF2)} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x, MkTestBF2 y) =>
@@ -161,6 +160,14 @@ prop_booleFunctionPolynumberIsomorphism = forAll {a = List Bool} {prop = Bool} a
       func = MkBooleFunction 2 vals
   in truthTable (fromPolynumber 2 (toPolynumber func)) == vals))
 
+-- Galadh Chooses Stone (polynumber isomorphism)
+prop_galadhadChoosesStone : Property
+prop_galadhadChoosesStone = forAll {a = List Bool} {prop = Bool} arbitrary (MkFn (\bools =>
+  let tableBool = take 4 (bools ++ replicate 4 False)
+      vals = map (\b => if b then OneS () 1 else ZeroS) tableBool
+      func = MkBooleFunction 2 vals
+  in truthTable (fromPolynumber 2 (toPolynumber func)) == vals))
+
 --------------------------------------------------------------------------------
 -- 3. TEST SUITE RUNNER
 --------------------------------------------------------------------------------
@@ -168,52 +175,59 @@ prop_booleFunctionPolynumberIsomorphism = forAll {a = List Bool} {prop = Bool} a
 partial
 runSuite : IO ()
 runSuite = do
-  putStrLn "Starting idris2-Boole QuickCheck verification suite..."
-  
+  putStrLn ""
+  putStrLn "----------------------------------------------------"
+  putStrLn "-- idris2-Singleton: Boolean Algebra Verification Suite --"
+  putStrLn "----------------------------------------------------"
+  putStrLn ""
+
   let r1 = quickCheck prop_bf2AddCommutative
   putStrLn $ "prop_bf2AddCommutative: " ++ r1.msg
-  
+
   let r2 = quickCheck prop_bf2AddIdentity
   putStrLn $ "prop_bf2AddIdentity: " ++ r2.msg
-  
+
   let r3 = quickCheck prop_bf2AddSelfAnnihilate
   putStrLn $ "prop_bf2AddSelfAnnihilate: " ++ r3.msg
-  
+
   let r4 = quickCheck prop_bf2MulCommutative
   putStrLn $ "prop_bf2MulCommutative: " ++ r4.msg
-  
+
   let r5 = quickCheck prop_bvalAddSelfAnnihilate
   putStrLn $ "prop_bvalAddSelfAnnihilate: " ++ r5.msg
-  
+
   let r6 = quickCheck prop_byteAddSelfAnnihilate
   putStrLn $ "prop_byteAddSelfAnnihilate: " ++ r6.msg
-  
+
   let r7 = quickCheck prop_circuitNotNotIdentity
   putStrLn $ "prop_circuitNotNotIdentity: " ++ r7.msg
-  
+
   let r8 = quickCheck prop_mobiusSelfInverse
   putStrLn $ "prop_mobiusSelfInverse: " ++ r8.msg
-  
+
   let r9 = quickCheck prop_sbfEvaluation
   putStrLn $ "prop_sbfEvaluation: " ++ r9.msg
-  
+
   let r10 = quickCheck prop_syllogismBarbara
   putStrLn $ "prop_syllogismBarbara: " ++ r10.msg
-  
+
   let r11 = quickCheck prop_idempotentCollapseMonomial
   putStrLn $ "prop_idempotentCollapseMonomial: " ++ r11.msg
-  
+
   let r12 = quickCheck prop_booleFunctionEvaluation
   putStrLn $ "prop_booleFunctionEvaluation: " ++ r12.msg
-  
+
   let r13 = quickCheck prop_booleFunctionPolynumberIsomorphism
   putStrLn $ "prop_booleFunctionPolynumberIsomorphism: " ++ r13.msg
-  
+
+  let r14 = quickCheck prop_galadhadChoosesStone
+  putStrLn $ "prop_galadhadChoosesStone: " ++ r14.msg
+
   -- Crash on failure to signal CI runner
-  let results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13]
+  let results = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14]
   let failures = filter (\r => isJust r.pass && fromMaybe True r.pass == False) results
   if null failures
-    then putStrLn "╔══════════════════════════════════════════╗\n║   All Boole tests complete               ║\n╚══════════════════════════════════════════╝"
+    then putStrLn "\nAll 14 tests passed."
     else idris_crash "❌ FAILURE: One or more properties failed verification."
 
 partial

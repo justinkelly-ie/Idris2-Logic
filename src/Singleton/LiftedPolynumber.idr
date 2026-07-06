@@ -1,16 +1,15 @@
-module Boole.LiftedPolynumber
+module Singleton.LiftedPolynumber
 
 import Data.List
 import Data.Nat
 import Math.Multiset
 import Math.Sing
-import Math.Sing1
 import Math.BoxInt
-import Boole.BF2
-import Boole.Bit
-import Boole.SingFraction
-import Boole.Bridge
-import Boole.Polynumber
+import Singleton.BF2
+import Singleton.Bit
+import Singleton.SingFraction
+import Singleton.Bridge
+import Singleton.Polynumber
 
 %default total
 

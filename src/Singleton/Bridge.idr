@@ -1,13 +1,13 @@
-module Boole.Bridge
+module Singleton.Bridge
 
 import Math.Multiset
 import Math.BoxInt
 import Math.IntPolynumber
 import Math.SignedFraction
 import Math.Sing
-import Boole.Bit
-import Boole.Polynumber
-import Boole.MobiusTransform
+import Singleton.Bit
+import Singleton.Polynumber
+import Singleton.MobiusTransform
 
 %default covering
 

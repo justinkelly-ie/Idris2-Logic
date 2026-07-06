@@ -1,15 +1,14 @@
-module Boole.FunctionalProbability
+module Singleton.FunctionalProbability
 
 import Data.List
 import Math.Multiset
 import Math.Sing
-import Math.Sing1
 import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
-import Boole.Bit
-import Boole.Bridge
-import Boole.SingFraction
+import Singleton.Bit
+import Singleton.Bridge
+import Singleton.SingFraction
 
 %default covering
 

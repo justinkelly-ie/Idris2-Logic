@@ -1,11 +1,11 @@
-module Boole.Circuit
+module Singleton.Circuit
 
 import Data.List
 import Math.Multiset
 import Math.IntPolynumber
-import Boole.Bit
-import public Boole.Polynumber
-import Boole.Bridge
+import Singleton.Bit
+import public Singleton.Polynumber
+import Singleton.Bridge
 
 %default total
 

@@ -1,4 +1,4 @@
-module Boole.MobiusTransform
+module Singleton.MobiusTransform
 
 import Data.List
 import Data.Nat
@@ -8,8 +8,9 @@ import Math.SignedFraction
 import Math.Interfaces
 import Math.OnSeq.OnMSet
 import Math.Sing
-import Boole.Bit
-import Boole.Polynumber
+import Singleton.Bit
+import Vexel.Byte
+import Singleton.Polynumber
 
 %default covering
 
@@ -229,15 +230,28 @@ threeEventUnionBounds pA pB pC pABC =
 -- ONGOING SEQUENCES (OnSeq integration)
 -----------------------------------------------------------------------
 
-||| An ongoing sequence of truth tables.
+||| The Boole-Möbius transform adapted for Byte Nat truth tables.
+||| For each output row i, XOR-accumulate the weights of all rows j where i ⊆ j
+||| (subset via binary encoding). Self-inverse: mobiusTransformByte² = id.
+public export
+mobiusTransformByte : Byte Nat -> Byte Nat
+mobiusTransformByte xs =
+  map (\i =>
+    let val = foldl (\acc, j =>
+                addBF2 acc (if isSubsetNat i j then lookupWeight j xs else Z))
+              Z [0..7]
+    in if val == O then OneS i O else ZeroS) [0..7]
+
+||| An ongoing sequence of Byte Nat truth tables.
+||| Aliased directly to OnVexel BF2 Nat from Math.OnSeq.OnMSet.
 public export
 0 OnTruthTable : Type
-OnTruthTable = OnSeq (List BVal)
+OnTruthTable = OnVexel BF2 Nat
 
 ||| Apply the Möbius transform pointwise over an ongoing truth table sequence.
 public export
 mobiusTransformOnSeq : OnTruthTable -> OnTruthTable
-mobiusTransformOnSeq = map mobiusTransform
+mobiusTransformOnSeq = map mobiusTransformByte
 
 ||| An ongoing sequence of probability bound intervals.
 public export

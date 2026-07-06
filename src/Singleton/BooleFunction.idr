@@ -1,14 +1,14 @@
-module Boole.BooleFunction
+module Singleton.BooleFunction
 
 import Data.List
 import Data.Nat
 import Math.Multiset
 import Math.Sing
-import Boole.Bit
-import Boole.BF2
-import Boole.Circuit
-import Boole.Polynumber
-import Boole.MobiusTransform
+import Singleton.Bit
+import Singleton.BF2
+import Singleton.Circuit
+import Singleton.Polynumber
+import Singleton.MobiusTransform
 
 %default total
 

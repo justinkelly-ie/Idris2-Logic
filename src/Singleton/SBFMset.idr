@@ -1,9 +1,9 @@
-module Boole.SBFMset
+module Singleton.SBFMset
 
 import Math.Multiset
 import Math.Pixel
 import Math.BoxInt
-import Boole.BF2
+import Singleton.BF2
 
 %default total
 
