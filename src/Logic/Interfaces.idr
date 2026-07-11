@@ -1,10 +1,12 @@
-module Singleton.Interfaces
+module Logic.Interfaces
 
 import Data.Vect
 import Data.Linear
 import Math.Interfaces
-import Singleton.Bit
-import Math.Sing
+import Math.Singleton.Bit
+import Math.Singleton.Sing
+import Math.BoxInt
+import Math.Multiset
 
 %default total
 
@@ -17,7 +19,9 @@ public export
 bvalsToIntegers : List BVal -> List Integer
 bvalsToIntegers [] = []
 bvalsToIntegers (ZeroS :: xs) = 0 :: bvalsToIntegers xs
-bvalsToIntegers (OneS () n :: xs) = n :: bvalsToIntegers xs
+bvalsToIntegers (OneS () n :: xs) =
+  let (MkUr val) = boxToInt n
+  in val :: bvalsToIntegers xs
 bvalsToIntegers (_ :: xs) = 0 :: bvalsToIntegers xs
 
 ||| Converts a list of Integers to BVals (mod 2).

@@ -1,4 +1,4 @@
-module Singleton.MobiusTransform
+module Logic.MobiusTransform
 
 import Data.List
 import Data.Nat
@@ -7,10 +7,10 @@ import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
 import Math.OnSeq.OnMSet
-import Math.Sing
-import Singleton.Bit
-import Vexel.Byte
-import Singleton.Polynumber
+import Math.Singleton.Sing
+import Math.Singleton.Bit
+import Math.Vexel.Byte
+import Logic.BoolePolynumber
 
 %default covering
 
@@ -238,15 +238,15 @@ mobiusTransformByte : Byte Nat -> Byte Nat
 mobiusTransformByte xs =
   map (\i =>
     let val = foldl (\acc, j =>
-                addBF2 acc (if isSubsetNat i j then lookupWeight j xs else Z))
-              Z [0..7]
-    in if val == O then OneS i O else ZeroS) [0..7]
+                addBVal acc (if isSubsetNat i j then lookupWeight j xs else Zero))
+              Zero [0..7]
+    in if isOne val then OneS i One else ZeroS) [0..7]
 
 ||| An ongoing sequence of Byte Nat truth tables.
-||| Aliased directly to OnVexel BF2 Nat from Math.OnSeq.OnMSet.
+||| Aliased directly to OnVexel BVal Nat from Math.OnSeq.OnMSet.
 public export
 0 OnTruthTable : Type
-OnTruthTable = OnVexel BF2 Nat
+OnTruthTable = OnVexel BVal Nat
 
 ||| Apply the Möbius transform pointwise over an ongoing truth table sequence.
 public export

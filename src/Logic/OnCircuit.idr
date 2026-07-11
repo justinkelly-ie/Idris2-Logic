@@ -1,12 +1,13 @@
-module Singleton.OnCircuit
+module Logic.OnCircuit
 
 import Data.List
 import Math.Multiset
 import Math.OnSeq.OnMSet
-import Singleton.Bit
-import Vexel.Byte
-import Singleton.Polynumber
-import Singleton.Circuit
+import Math.Singleton.Bit
+import Math.Vexel.Byte
+import Math.BoxInt
+import Logic.BoolePolynumber
+import Logic.Circuit
 
 %default total
 

@@ -1,8 +1,10 @@
-module Singleton.Syllogism
+module Logic.Syllogism
 
 import Data.Vect
-import Singleton.Bit
-import Vexel.Byte
+import Math.Singleton.Bit
+import Math.Vexel.Byte
+import Math.BoxInt
+import Math.Multiset
 
 %default total
 

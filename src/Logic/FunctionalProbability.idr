@@ -1,14 +1,14 @@
-module Singleton.FunctionalProbability
+module Logic.FunctionalProbability
 
 import Data.List
 import Math.Multiset
-import Math.Sing
+import Math.Singleton.Sing
 import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
-import Singleton.Bit
-import Singleton.Bridge
-import Singleton.SingFraction
+import Math.Singleton.Bit
+import Logic.Bridge
+import Math.Singleton.SingFraction
 
 %default covering
 

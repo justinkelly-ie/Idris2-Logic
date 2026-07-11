@@ -1,13 +1,13 @@
-module Singleton.Bridge
+module Logic.Bridge
 
 import Math.Multiset
 import Math.BoxInt
 import Math.IntPolynumber
 import Math.SignedFraction
-import Math.Sing
-import Singleton.Bit
-import Singleton.Polynumber
-import Singleton.MobiusTransform
+import Math.Singleton.Sing
+import Math.Singleton.Bit
+import Logic.BoolePolynumber
+import Logic.MobiusTransform
 
 %default covering
 
@@ -22,18 +22,6 @@ import Singleton.MobiusTransform
 --
 -- Source: Wildberger Lectures 270–272.
 -----------------------------------------------------------------------
-
------------------------------------------------------------------------
--- 1. EMBEDDING: BVal → BoxInt
------------------------------------------------------------------------
-
-||| Embed a single BVal into BoxInt (ℤ).
-||| Zero ↦ 0,  One ↦ 1.
-public export
-bvalToBoxInt : BVal -> BoxInt
-bvalToBoxInt ZeroS = 0
-bvalToBoxInt (OneS () 1) = 1
-bvalToBoxInt _ = 0
 
 ||| Embed a BVal list (truth table or coefficient vector) into BoxInt list.
 public export

@@ -3,25 +3,24 @@ module Main
 import QuickCheck
 import Data.List
 import Math.Multiset
-import Math.Sing
+import Math.Singleton.Sing
 import Math.Pixel
 import Math.BoxInt
 import Math.SignedFraction
 import Math.Interfaces
-import Math.Vexel
-import Math.DepVexel
-import Singleton.Bit
-import Singleton.BF2
-import Singleton.Polynumber
-import Singleton.Circuit
-import Singleton.MobiusTransform
-import Singleton.SBFMset
-import Singleton.SingFraction
-import Singleton.Syllogism
-import Singleton.LiftedPolynumber
-import Singleton.BooleFunction
-import Vexel.Byte
-import Vexel.Transformation
+import Math.Vexel.Vexel
+import Math.Vexel.DepVexel
+import Math.Singleton.Bit
+import Logic.BoolePolynumber
+import Logic.Circuit
+import Logic.MobiusTransform
+import Math.Singleton.SBFMset
+import Math.Singleton.SingFraction
+import Logic.Syllogism
+import Logic.LiftedPolynumber
+import Logic.BooleFunction
+import Math.Vexel.Byte
+import Math.Vexel.Transformation
 
 %default total
 
@@ -30,20 +29,20 @@ import Vexel.Transformation
 --------------------------------------------------------------------------------
 
 public export
-record TestBF2 where
-  constructor MkTestBF2
-  val : BF2
+record TestBVal where
+  constructor MkTestBVal
+  val : BVal
 
 public export
-Show TestBF2 where
-  show (MkTestBF2 x) = if x == ZeroS then "ZeroS" else "OneS () 1"
+Show TestBVal where
+  show (MkTestBVal x) = if x == ZeroS then "ZeroS" else "OneS () 1"
 
 public export
-Arbitrary TestBF2 where
+Arbitrary TestBVal where
   arbitrary = do
     b <- arbitrary {a=Bool}
-    pure (MkTestBF2 (if b then ZeroS else OneS () 1))
-  coarbitrary (MkTestBF2 x) gen =
+    pure (MkTestBVal (if b then ZeroS else OneS () 1))
+  coarbitrary (MkTestBVal x) gen =
     if x == ZeroS then variant 0 gen else variant 1 gen
 
 public export
@@ -69,26 +68,25 @@ Arbitrary MSetFraction where
 -- 2. PROPERTIES FOR CORE TYPES
 --------------------------------------------------------------------------------
 
--- BF2 Properties
-prop_bf2AddCommutative : Property
-prop_bf2AddCommutative = forAll {a = (TestBF2, TestBF2)} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x, MkTestBF2 y) =>
+-- BVal Properties
+prop_bvalAddCommutative : Property
+prop_bvalAddCommutative = forAll {a = (TestBVal, TestBVal)} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x, MkTestBVal y) =>
   Prelude.(+) x y == Prelude.(+) y x))
 
-prop_bf2AddIdentity : Property
-prop_bf2AddIdentity = forAll {a = TestBF2} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x) =>
-  Prelude.(+) x Singleton.BF2.Z == x))
+prop_bvalAddIdentity : Property
+prop_bvalAddIdentity = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
+  Prelude.(+) x Zero == x))
 
-prop_bf2AddSelfAnnihilate : Property
-prop_bf2AddSelfAnnihilate = forAll {a = TestBF2} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x) =>
-  Prelude.(+) x x == Singleton.BF2.Z))
+prop_bvalAddSelfAnnihilate : Property
+prop_bvalAddSelfAnnihilate = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
+  Prelude.(+) x x == Zero))
 
-prop_bf2MulCommutative : Property
-prop_bf2MulCommutative = forAll {a = (TestBF2, TestBF2)} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x, MkTestBF2 y) =>
+prop_bvalMulCommutative : Property
+prop_bvalMulCommutative = forAll {a = (TestBVal, TestBVal)} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x, MkTestBVal y) =>
   Prelude.(*) x y == Prelude.(*) y x))
 
--- BVal Properties
-prop_bvalAddSelfAnnihilate : Property
-prop_bvalAddSelfAnnihilate = forAll {a = TestBF2} {prop = Bool} arbitrary (MkFn (\(MkTestBF2 x) =>
+prop_bvalAddSelfAnnihilateZeroS : Property
+prop_bvalAddSelfAnnihilateZeroS = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
   Prelude.(+) x x == ZeroS))
 
 -- Byte Properties
@@ -177,24 +175,24 @@ runSuite : IO ()
 runSuite = do
   putStrLn ""
   putStrLn "----------------------------------------------------"
-  putStrLn "-- idris2-Singleton: Boolean Algebra Verification Suite --"
+  putStrLn "-- idris2-Logic: Boolean Algebra Verification Suite --"
   putStrLn "----------------------------------------------------"
   putStrLn ""
 
-  let r1 = quickCheck prop_bf2AddCommutative
-  putStrLn $ "prop_bf2AddCommutative: " ++ r1.msg
+  let r1 = quickCheck prop_bvalAddCommutative
+  putStrLn $ "prop_bvalAddCommutative: " ++ r1.msg
 
-  let r2 = quickCheck prop_bf2AddIdentity
-  putStrLn $ "prop_bf2AddIdentity: " ++ r2.msg
+  let r2 = quickCheck prop_bvalAddIdentity
+  putStrLn $ "prop_bvalAddIdentity: " ++ r2.msg
 
-  let r3 = quickCheck prop_bf2AddSelfAnnihilate
-  putStrLn $ "prop_bf2AddSelfAnnihilate: " ++ r3.msg
+  let r3 = quickCheck prop_bvalAddSelfAnnihilate
+  putStrLn $ "prop_bvalAddSelfAnnihilate: " ++ r3.msg
 
-  let r4 = quickCheck prop_bf2MulCommutative
-  putStrLn $ "prop_bf2MulCommutative: " ++ r4.msg
+  let r4 = quickCheck prop_bvalMulCommutative
+  putStrLn $ "prop_bvalMulCommutative: " ++ r4.msg
 
-  let r5 = quickCheck prop_bvalAddSelfAnnihilate
-  putStrLn $ "prop_bvalAddSelfAnnihilate: " ++ r5.msg
+  let r5 = quickCheck prop_bvalAddSelfAnnihilateZeroS
+  putStrLn $ "prop_bvalAddSelfAnnihilateZeroS: " ++ r5.msg
 
   let r6 = quickCheck prop_byteAddSelfAnnihilate
   putStrLn $ "prop_byteAddSelfAnnihilate: " ++ r6.msg
