@@ -26,32 +26,32 @@ import Logic.BoolePolynumber
 ||| Apply the Boole-Möbius transform.
 ||| Self-inverse: mobiusTransform (mobiusTransform v) = v.
 public export
-mobiusTransform : List BVal -> List BVal
+mobiusTransform : List Bit -> List Bit
 mobiusTransform xs =
   let size = length xs
   in map (\i => foldRow i 0 xs) [0 .. minus size 1]
   where
-    foldRow : Nat -> Nat -> List BVal -> BVal
+    foldRow : Nat -> Nat -> List Bit -> Bit
     foldRow _ _ [] = Zero
     foldRow i j (x :: rest) =
       let contrib = if isSubsetNat i j then x else Zero
-      in addBVal contrib (foldRow i (S j) rest)
+      in addBit contrib (foldRow i (S j) rest)
 
 ||| Convert a Boolean function (dense truth table) to Boole polynumber.
 public export
-boolFuncToBoole : List BVal -> BoolePolynumber
+boolFuncToBoole : List Bit -> BoolePolynumber
 boolFuncToBoole truthTable = denseToSparse (mobiusTransform truthTable)
 
 ||| Convert a Boole polynumber to Boolean function (dense truth table).
 public export
-booleToBoolFunc : (numVars : Nat) -> BoolePolynumber -> List BVal
+booleToBoolFunc : (numVars : Nat) -> BoolePolynumber -> List Bit
 booleToBoolFunc n poly =
   let dense = sparseToDense (power 2 n) poly
   in mobiusTransform dense
 
-||| Convert an index to a list of BVal inputs of length n.
+||| Convert an index to a list of Bit inputs of length n.
 public export
-indexToAssignment : (n : Nat) -> Nat -> List BVal
+indexToAssignment : (n : Nat) -> Nat -> List Bit
 indexToAssignment Z _ = []
 indexToAssignment (S k) j =
   let bit = if isOdd j then One else Zero
@@ -60,16 +60,16 @@ indexToAssignment (S k) j =
 ||| Verify that a Boole polynumber is equivalent to its source Boolean function (truth table).
 ||| For all inputs j ∈ [0, 2^n-1], evalBoolePoly poly (indexToAssignment n j) == truthTable[j].
 public export
-verifyEquivalence : (n : Nat) -> List BVal -> Bool
+verifyEquivalence : (n : Nat) -> List Bit -> Bool
 verifyEquivalence n truthTable =
   let poly = boolFuncToBoole truthTable
       size = power 2 n
-  in all (\j => evalBoolePoly poly (indexToAssignment n j) == lookupBVal j truthTable) [0 .. minus size 1]
+  in all (\j => evalBoolePoly poly (indexToAssignment n j) == lookupBit j truthTable) [0 .. minus size 1]
   where
-    lookupBVal : Nat -> List BVal -> BVal
-    lookupBVal _ [] = Zero
-    lookupBVal Z (x :: _) = x
-    lookupBVal (S k) (_ :: rest) = lookupBVal k rest
+    lookupBit : Nat -> List Bit -> Bit
+    lookupBit _ [] = Zero
+    lookupBit Z (x :: _) = x
+    lookupBit (S k) (_ :: rest) = lookupBit k rest
 
 
 -----------------------------------------------------------------------
@@ -236,22 +236,25 @@ threeEventUnionBounds pA pB pC pABC =
 public export
 mobiusTransformByte : Byte Nat -> Byte Nat
 mobiusTransformByte xs =
-  map (\i =>
-    let val = foldl (\acc, j =>
-                addBVal acc (if isSubsetNat i j then lookupWeight j xs else Zero))
+  foldl (\acc, i =>
+    let val = foldl (\accInner, j =>
+                addBit accInner (if isSubsetNat i j then lookupWeight j xs else Zero))
               Zero [0..7]
-    in if isOne val then OneS i One else ZeroS) [0..7]
+    in if isOne val
+       then AddM (MkSing i) One acc
+       else acc
+  ) ZeroM [0..7]
 
 ||| An ongoing sequence of Byte Nat truth tables.
-||| Aliased directly to OnVexel BVal Nat from Math.OnSeq.OnMSet.
+||| Aliased directly to OnVexel Bit Nat from Math.OnSeq.OnMSet.
 public export
 0 OnTruthTable : Type
-OnTruthTable = OnVexel BVal Nat
+OnTruthTable = OnVexel Bit Nat
 
 ||| Apply the Möbius transform pointwise over an ongoing truth table sequence.
 public export
 mobiusTransformOnSeq : OnTruthTable -> OnTruthTable
-mobiusTransformOnSeq = map mobiusTransformByte
+mobiusTransformOnSeq = OnMSet.map mobiusTransformByte
 
 ||| An ongoing sequence of probability bound intervals.
 public export

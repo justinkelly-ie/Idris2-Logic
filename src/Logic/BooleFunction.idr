@@ -19,7 +19,7 @@ public export
 record BooleFunction where
   constructor MkBooleFunction
   arity : Nat
-  truthTable : List BVal
+  truthTable : List Bit
 
 ||| Helper to lookup elements in a list.
 public export
@@ -28,23 +28,23 @@ lookupIndex _ [] = Nothing
 lookupIndex 0 (x :: _) = Just x
 lookupIndex (S k) (_ :: xs) = lookupIndex k xs
 
-||| Converts a binary tuple of BVals (where OneS () 1 is 1 and ZeroS is 0) to a Nat index.
+||| Converts a binary tuple of Bits (where One is 1 and Zero is 0) to a Nat index.
 ||| e.g. [0, 0] -> 0, [0, 1] -> 1, [1, 0] -> 2, [1, 1] -> 3.
 public export
-tupleToIndex : List BVal -> Nat
+tupleToIndex : List Bit -> Nat
 tupleToIndex [] = 0
 tupleToIndex (x :: xs) =
-  let bit = if x == ZeroS then 0 else 1
+  let bit = if isOne x then 1 else 0
   in bit * (power 2 (length xs)) + tupleToIndex xs
 
 ||| Evaluate a BooleFunction at a given input tuple.
 public export
-evaluate : BooleFunction -> List BVal -> BVal
+evaluate : BooleFunction -> List Bit -> Bit
 evaluate (MkBooleFunction arity table) inputs =
   let idx = tupleToIndex inputs
   in case lookupIndex idx table of
        Just val => val
-       Nothing  => ZeroS
+       Nothing  => Zero
 
 ||| Convert a BooleFunction to its unique algebraic BoolePolynumber representation.
 ||| This uses the Boole-Möbius transform to find the polynumber coefficients.
@@ -67,7 +67,7 @@ public export
 constantZero : (arity : Nat) -> BooleFunction
 constantZero arity =
   let size = power 2 arity
-      table = replicate size (the BVal ZeroS)
+      table = replicate size Zero
   in MkBooleFunction arity table
 
 ||| The constant one BooleFunction of a given arity.
@@ -75,7 +75,7 @@ public export
 constantOne : (arity : Nat) -> BooleFunction
 constantOne arity =
   let size = power 2 arity
-      table = replicate size (OneS () 1)
+      table = replicate size One
   in MkBooleFunction arity table
 
 ||| The projection BooleFunction returning the value of the i-th variable.
@@ -84,7 +84,7 @@ public export
 projection : (arity : Nat) -> (varIdx : Nat) -> BooleFunction
 projection arity varIdx =
   let size = power 2 arity
-      table = map (\idx => if testBit idx varIdx then OneS () 1 else the BVal ZeroS) [0 .. minus size 1]
+      table = map (\idx => if testBit idx varIdx then One else Zero) [0 .. minus size 1]
   in MkBooleFunction arity table
   where
     testBit : Nat -> Nat -> Bool

@@ -111,7 +111,7 @@ camestres p m s =
 ||| Modus Ponens: P, P→Q ⊢ Q.
 ||| P→Q = 1 + P + PQ. Premise P·(1+P+PQ) = PQ.
 public export
-modusPonens : BVal -> BVal -> BVal
+modusPonens : Bit -> Bit -> Bit
 modusPonens p q =
   let premise = p * (One + p + p * q)
   in if premise == Zero
@@ -120,7 +120,7 @@ modusPonens p q =
 
 ||| Modus Tollens: P→Q, ¬Q ⊢ ¬P.
 public export
-modusTollens : BVal -> BVal -> BVal
+modusTollens : Bit -> Bit -> Bit
 modusTollens p q =
   let implication = One + p + p * q
       notQ = One + q

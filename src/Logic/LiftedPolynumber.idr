@@ -9,6 +9,7 @@ import Math.Singleton.Bit
 import Math.Singleton.SingFraction
 import Logic.Bridge
 import Logic.BoolePolynumber
+import Math.Vexel.Vexel
 
 %default total
 
@@ -91,19 +92,26 @@ mulLiftedPoly (MKPolynumber p1) (MKPolynumber p2) =
 
 ||| The canonical unit denominator multiset for Row 2.
 public export
-theSingUnitConstantZ : Sing1 BoxInt TrivialBase
-theSingUnitConstantZ = MkSing1 BaseAnchor 1
+theSingUnitConstantZ : Sing TrivialBase
+theSingUnitConstantZ = MkSing BaseAnchor
+
+||| Helper to lookup coordinate weights in a Vexel BoxInt.
+public export
+lookupWeightVexel : Eq state => state -> Vexel BoxInt state -> BoxInt
+lookupWeightVexel _ ZeroM = 0
+lookupWeightVexel x (AddM (MkSing y) w rest) =
+  if x == y then w + lookupWeightVexel x rest else lookupWeightVexel x rest
 
 ||| Row 2: The Lifted Polynomial Fraction structure.
 ||| Encodes an integer-weighted singleton numerator over a strictly positive unit denominator.
 public export
 record LiftedBooleFraction (state : Type) where
   constructor OverLiftedCircuit
-  numeratorPolynumber : Sing BoxInt state
-  denominatorUnit     : Sing1 BoxInt TrivialBase
+  numeratorPolynumber : Vexel BoxInt state
+  denominatorUnit     : Sing TrivialBase
 
 public export
-mkLiftedBooleFraction : Sing BoxInt state -> LiftedBooleFraction state
+mkLiftedBooleFraction : Vexel BoxInt state -> LiftedBooleFraction state
 mkLiftedBooleFraction bits = OverLiftedCircuit bits theSingUnitConstantZ
 
 ||| Lift the singleton fraction to the lifted fraction (Row 2 complete type).
@@ -114,10 +122,7 @@ liftSingFractionToRow2 frac = mkLiftedBooleFraction (liftSingToRow2 frac)
 ||| Evaluate a state from the lifted fraction.
 public export
 evalLiftedFraction : Eq state => LiftedBooleFraction state -> state -> BoxInt
-evalLiftedFraction (OverLiftedCircuit num _) s =
-  case num of
-    ZeroS => 0
-    OneS k v => if k == s then v else 0
+evalLiftedFraction (OverLiftedCircuit num _) s = lookupWeightVexel s num
 
 
 

@@ -14,7 +14,7 @@ import Logic.MobiusTransform
 -----------------------------------------------------------------------
 -- BOOLE → BOXINT BRIDGE
 --
--- Row 1 (Digital Repetition) operates over BVal ∈ {0,1} (𝔽₂).
+-- Row 1 (Digital Repetition) operates over Bit ∈ {0,1} (𝔽₂).
 -- Row 2 (Lifted Polynumbers) operates over BoxInt ∈ ℤ.
 --
 -- This module provides the embedding and the integer-valued
@@ -23,10 +23,10 @@ import Logic.MobiusTransform
 -- Source: Wildberger Lectures 270–272.
 -----------------------------------------------------------------------
 
-||| Embed a BVal list (truth table or coefficient vector) into BoxInt list.
+||| Embed a Bit list (truth table or coefficient vector) into BoxInt list.
 public export
-bvalsToBoxInts : List BVal -> List BoxInt
-bvalsToBoxInts = map bvalToBoxInt
+bitsToBoxInts : List Bit -> List BoxInt
+bitsToBoxInts = map bitToBoxInt
 
 -----------------------------------------------------------------------
 -- 2. LIFTING: BoolePolynumber → IntPolynumber
@@ -39,7 +39,7 @@ public export
 booleToIntPoly : BoolePolynumber -> IntPolynumber
 booleToIntPoly ZeroM = ZeroM
 booleToIntPoly (AddM subsetIdx coeff rest) =
-  let boxCoeff = bvalToBoxInt coeff
+  let boxCoeff = bitToBoxInt coeff
   in if boxCoeff == 0
      then booleToIntPoly rest
      else AddM (subsetIdx, 0) boxCoeff (booleToIntPoly rest)
@@ -112,20 +112,20 @@ mobiusInverseZ ys =
 -- 4. BOOLEAN FUNCTION → INTEGER POLYNOMIAL (Full Pipeline)
 -----------------------------------------------------------------------
 
-||| Full pipeline: truth table (BVal) → Möbius lift → integer polynomial.
-||| Applies the BVal Möbius transform first, then embeds the result
+||| Full pipeline: truth table (Bit) → Möbius lift → integer polynomial.
+||| Applies the Bit Möbius transform first, then embeds the result
 ||| as an IntPolynumber.
 public export
-truthTableToIntPoly : List BVal -> IntPolynumber
+truthTableToIntPoly : List Bit -> IntPolynumber
 truthTableToIntPoly tt =
   let boole = boolFuncToBoole tt
   in booleToIntPoly boole
 
-||| Full pipeline: truth table (BVal) → integer Möbius transform.
-||| Embeds BVal → BoxInt first, then applies the ℤ-valued transform.
+||| Full pipeline: truth table (Bit) → integer Möbius transform.
+||| Embeds Bit → BoxInt first, then applies the ℤ-valued transform.
 public export
-truthTableToBoxInts : List BVal -> List BoxInt
-truthTableToBoxInts tt = mobiusTransformZ (bvalsToBoxInts tt)
+truthTableToBoxInts : List Bit -> List BoxInt
+truthTableToBoxInts tt = mobiusTransformZ (bitsToBoxInts tt)
 
 -----------------------------------------------------------------------
 -- 5. LINEAR BRIDGE FRACTION INTEGRATION

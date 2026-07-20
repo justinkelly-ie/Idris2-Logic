@@ -43,7 +43,7 @@ varSequence = MkOnSeq 0 (\n => Var n)
 
 ||| Pointwise evaluation of an ongoing circuit sequence at an ongoing assignment sequence.
 public export
-evalOnCircuit : OnCircuit -> OnSeq (List BVal) -> OnSeq BVal
+evalOnCircuit : OnCircuit -> OnSeq (List Bit) -> OnSeq Bit
 evalOnCircuit = zipWith evalBoolePoly
 
 -----------------------------------------------------------------------

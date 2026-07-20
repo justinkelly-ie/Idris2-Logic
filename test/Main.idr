@@ -29,21 +29,21 @@ import Math.Vexel.Transformation
 --------------------------------------------------------------------------------
 
 public export
-record TestBVal where
-  constructor MkTestBVal
-  val : BVal
+record TestBit where
+  constructor MkTestBit
+  val : Bit
 
 public export
-Show TestBVal where
-  show (MkTestBVal x) = if x == ZeroS then "ZeroS" else "OneS () 1"
+Show TestBit where
+  show (MkTestBit x) = if x == Zero then "Zero" else "One"
 
 public export
-Arbitrary TestBVal where
+Arbitrary TestBit where
   arbitrary = do
     b <- arbitrary {a=Bool}
-    pure (MkTestBVal (if b then ZeroS else OneS () 1))
-  coarbitrary (MkTestBVal x) gen =
-    if x == ZeroS then variant 0 gen else variant 1 gen
+    pure (MkTestBit (if b then Zero else One))
+  coarbitrary (MkTestBit x) gen =
+    if x == Zero then variant 0 gen else variant 1 gen
 
 public export
 Arbitrary BoxInt where
@@ -68,48 +68,48 @@ Arbitrary MSetFraction where
 -- 2. PROPERTIES FOR CORE TYPES
 --------------------------------------------------------------------------------
 
--- BVal Properties
-prop_bvalAddCommutative : Property
-prop_bvalAddCommutative = forAll {a = (TestBVal, TestBVal)} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x, MkTestBVal y) =>
+-- Bit Properties
+prop_bitAddCommutative : Property
+prop_bitAddCommutative = forAll {a = (TestBit, TestBit)} {prop = Bool} arbitrary (MkFn (\(MkTestBit x, MkTestBit y) =>
   Prelude.(+) x y == Prelude.(+) y x))
 
-prop_bvalAddIdentity : Property
-prop_bvalAddIdentity = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
+prop_bitAddIdentity : Property
+prop_bitAddIdentity = forAll {a = TestBit} {prop = Bool} arbitrary (MkFn (\(MkTestBit x) =>
   Prelude.(+) x Zero == x))
 
-prop_bvalAddSelfAnnihilate : Property
-prop_bvalAddSelfAnnihilate = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
+prop_bitAddSelfAnnihilate : Property
+prop_bitAddSelfAnnihilate = forAll {a = TestBit} {prop = Bool} arbitrary (MkFn (\(MkTestBit x) =>
   Prelude.(+) x x == Zero))
 
-prop_bvalMulCommutative : Property
-prop_bvalMulCommutative = forAll {a = (TestBVal, TestBVal)} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x, MkTestBVal y) =>
+prop_bitMulCommutative : Property
+prop_bitMulCommutative = forAll {a = (TestBit, TestBit)} {prop = Bool} arbitrary (MkFn (\(MkTestBit x, MkTestBit y) =>
   Prelude.(*) x y == Prelude.(*) y x))
 
-prop_bvalAddSelfAnnihilateZeroS : Property
-prop_bvalAddSelfAnnihilateZeroS = forAll {a = TestBVal} {prop = Bool} arbitrary (MkFn (\(MkTestBVal x) =>
-  Prelude.(+) x x == ZeroS))
+prop_bitAddSelfAnnihilateZeroS : Property
+prop_bitAddSelfAnnihilateZeroS = forAll {a = TestBit} {prop = Bool} arbitrary (MkFn (\(MkTestBit x) =>
+  Prelude.(+) x x == Zero))
 
 -- Byte Properties
 prop_byteAddSelfAnnihilate : Property
 prop_byteAddSelfAnnihilate = forAll {a = List Nat} {prop = Bool} arbitrary (MkFn (\xs =>
   let byte = oneByte xs
-  in addByte byte byte == []))
+  in addByte byte byte == ZeroM))
 
 -- Circuit / Polynumber Properties
 prop_circuitNotNotIdentity : Property
 prop_circuitNotNotIdentity = forAll {a = List Bool} {prop = Bool} arbitrary (MkFn (\inputsBool =>
-  let inputs = map (\b => if b then OneS () 1 else ZeroS) inputsBool
+  let inputs = map (\b => if b then One else Zero) inputsBool
       circ = Var 0
       notNot = 1 + (1 + circ)
       -- Ensure we have at least one input variable
-      paddedInputs = if null inputs then [ZeroS] else inputs
+      paddedInputs = if null inputs then [Zero] else inputs
   in evalBoolePoly notNot paddedInputs == evalBoolePoly circ paddedInputs))
 
 -- Mobius Transform Properties
 prop_mobiusSelfInverse : Property
 prop_mobiusSelfInverse = forAll {a = List Bool} {prop = Property} arbitrary (MkFn (\bools =>
   not (null bools) ==>
-  let vals = map (\b => if b then OneS () 1 else ZeroS) (take 4 bools)
+  let vals = map (\b => if b then One else Zero) (take 4 bools)
   in mobiusTransform (mobiusTransform vals) == vals))
 
 -- SBFMset Properties
@@ -140,21 +140,21 @@ prop_idempotentCollapseMonomial = forAll {a = List Nat} {prop = Bool} arbitrary 
 prop_booleFunctionEvaluation : Property
 prop_booleFunctionEvaluation = forAll {a = List Bool} {prop = Bool} arbitrary (MkFn (\bools =>
   let tableBool = take 4 (bools ++ replicate 4 False)
-      vals = map (\b => if b then OneS () 1 else ZeroS) tableBool
+      vals = map (\b => if b then One else Zero) tableBool
       func = MkBooleFunction 2 vals
-      in0 = [the BVal ZeroS, the BVal ZeroS]
-      in1 = [the BVal ZeroS, OneS () 1]
-      in2 = [OneS () 1, the BVal ZeroS]
-      in3 = [OneS () 1, OneS () 1]
-  in (evaluate func in0 == fromMaybe ZeroS (lookupIndex 0 vals)) &&
-     (evaluate func in1 == fromMaybe ZeroS (lookupIndex 1 vals)) &&
-     (evaluate func in2 == fromMaybe ZeroS (lookupIndex 2 vals)) &&
-     (evaluate func in3 == fromMaybe ZeroS (lookupIndex 3 vals))))
+      in0 = [the Bit Zero, the Bit Zero]
+      in1 = [the Bit Zero, One]
+      in2 = [One, the Bit Zero]
+      in3 = [One, One]
+  in (evaluate func in0 == fromMaybe Zero (lookupIndex 0 vals)) &&
+     (evaluate func in1 == fromMaybe Zero (lookupIndex 1 vals)) &&
+     (evaluate func in2 == fromMaybe Zero (lookupIndex 2 vals)) &&
+     (evaluate func in3 == fromMaybe Zero (lookupIndex 3 vals))))
 
 prop_booleFunctionPolynumberIsomorphism : Property
 prop_booleFunctionPolynumberIsomorphism = forAll {a = List Bool} {prop = Bool} arbitrary (MkFn (\bools =>
   let tableBool = take 4 (bools ++ replicate 4 False)
-      vals = map (\b => if b then OneS () 1 else ZeroS) tableBool
+      vals = map (\b => if b then One else Zero) tableBool
       func = MkBooleFunction 2 vals
   in truthTable (fromPolynumber 2 (toPolynumber func)) == vals))
 
@@ -162,7 +162,7 @@ prop_booleFunctionPolynumberIsomorphism = forAll {a = List Bool} {prop = Bool} a
 prop_galadhadChoosesStone : Property
 prop_galadhadChoosesStone = forAll {a = List Bool} {prop = Bool} arbitrary (MkFn (\bools =>
   let tableBool = take 4 (bools ++ replicate 4 False)
-      vals = map (\b => if b then OneS () 1 else ZeroS) tableBool
+      vals = map (\b => if b then One else Zero) tableBool
       func = MkBooleFunction 2 vals
   in truthTable (fromPolynumber 2 (toPolynumber func)) == vals))
 
@@ -179,20 +179,20 @@ runSuite = do
   putStrLn "----------------------------------------------------"
   putStrLn ""
 
-  let r1 = quickCheck prop_bvalAddCommutative
-  putStrLn $ "prop_bvalAddCommutative: " ++ r1.msg
+  let r1 = quickCheck prop_bitAddCommutative
+  putStrLn $ "prop_bitAddCommutative: " ++ r1.msg
 
-  let r2 = quickCheck prop_bvalAddIdentity
-  putStrLn $ "prop_bvalAddIdentity: " ++ r2.msg
+  let r2 = quickCheck prop_bitAddIdentity
+  putStrLn $ "prop_bitAddIdentity: " ++ r2.msg
 
-  let r3 = quickCheck prop_bvalAddSelfAnnihilate
-  putStrLn $ "prop_bvalAddSelfAnnihilate: " ++ r3.msg
+  let r3 = quickCheck prop_bitAddSelfAnnihilate
+  putStrLn $ "prop_bitAddSelfAnnihilate: " ++ r3.msg
 
-  let r4 = quickCheck prop_bvalMulCommutative
-  putStrLn $ "prop_bvalMulCommutative: " ++ r4.msg
+  let r4 = quickCheck prop_bitMulCommutative
+  putStrLn $ "prop_bitMulCommutative: " ++ r4.msg
 
-  let r5 = quickCheck prop_bvalAddSelfAnnihilateZeroS
-  putStrLn $ "prop_bvalAddSelfAnnihilateZeroS: " ++ r5.msg
+  let r5 = quickCheck prop_bitAddSelfAnnihilateZeroS
+  putStrLn $ "prop_bitAddSelfAnnihilateZeroS: " ++ r5.msg
 
   let r6 = quickCheck prop_byteAddSelfAnnihilate
   putStrLn $ "prop_byteAddSelfAnnihilate: " ++ r6.msg
